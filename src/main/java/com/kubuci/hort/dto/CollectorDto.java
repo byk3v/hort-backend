@@ -5,5 +5,6 @@ public record CollectorDto (
 	String firstName,
 	String lastName,
 	String address,
-	String phone
+	String phone,
+	String collectorType
 ){}

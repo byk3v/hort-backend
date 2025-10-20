@@ -60,7 +60,8 @@ public class StudentService {
 						cp.getFirstName(),
 						cp.getLastName(),
 						cp.getAddress(),
-						cp.getPhone()
+						cp.getPhone(),
+						pr.getCollector().getCollectorType().name()
 					);
 				}, Collectors.toCollection(ArrayList::new))
 			));
@@ -82,8 +83,6 @@ public class StudentService {
 					p.getLastName(),
 					p.getAddress(),
 					g.getName(),
-					s.isCanLeaveAlone(),
-					s.getAllowedTimeToLeave(),
 					colls
 				);
 			})
@@ -105,8 +104,6 @@ public class StudentService {
 		Student student = new Student();
 		student.setPerson(p);
 		student.setGroup(group);
-		student.setCanLeaveAlone(req.canLeaveAlone());
-		student.setAllowedTimeToLeave(req.allowedTimeToLeave());
 
 		Student saved = studentRepository.save(student);
 		return saved.getId();

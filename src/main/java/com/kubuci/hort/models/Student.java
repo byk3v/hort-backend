@@ -1,7 +1,5 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDate;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -32,12 +30,6 @@ public class Student {
 	@JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
 	private Group group;
 
-	@Column(name = "can_leave_alone", nullable = false)
-	private boolean canLeaveAlone = false;
-
-	@Column(name = "allowed_time_to_leave")
-	private LocalDate allowedTimeToLeave;
-
 	public Long getId() {
 		return id;
 	}
@@ -62,19 +54,5 @@ public class Student {
 		this.group = group;
 	}
 
-	public boolean isCanLeaveAlone() {
-		return canLeaveAlone;
-	}
 
-	public void setCanLeaveAlone(boolean canLeaveAlone) {
-		this.canLeaveAlone = canLeaveAlone;
-	}
-
-	public LocalDate getAllowedTimeToLeave() {
-		return allowedTimeToLeave;
-	}
-
-	public void setAllowedTimeToLeave(LocalDate allowedTimeToLeave) {
-		this.allowedTimeToLeave = allowedTimeToLeave;
-	}
 }

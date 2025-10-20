@@ -8,9 +8,7 @@ public record StudentDto(
 	String firstName,
 	String lastName,
 	String address,
-	String group,                  // group name
-	boolean canLeaveAlone,
-	LocalDate allowedTimeToLeave,
+	String group,
 	List<CollectorDto> collectors
 ) {
 
