@@ -16,7 +16,7 @@ import com.kubuci.hort.dto.StudentOnboardingResponse;
 import com.kubuci.hort.dto.StudentSaveRequest;
 import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.Collector;
-import com.kubuci.hort.models.Group;
+import com.kubuci.hort.models.HortGroup;
 import com.kubuci.hort.models.Person;
 import com.kubuci.hort.models.PickupRight;
 import com.kubuci.hort.models.Student;
@@ -108,7 +108,7 @@ public class StudentService {
 		p.setPhone(req.phone());
 		personRepository.save(p);
 
-		Group group = groupRepository.findById(req.groupId())
+		HortGroup group = groupRepository.findById(req.groupId())
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();
@@ -127,7 +127,7 @@ public class StudentService {
 		studentData.setAddress(req.student().address());
 		personRepository.save(studentData);
 
-		Group group = groupRepository.findById(req.groupId())
+		HortGroup group = groupRepository.findById(Long.valueOf(req.groupId()))
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();

@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5542/hortdb
+    username: hort
+    password: hort
+
+  flyway:
+    enabled: true
+    # usa y crea el schema 'hort' (¡primera vez listo!)
+    create-schemas: true
+    schemas: hort
+    default-schema: hort
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: hort
+        jdbc.time_zone: UTC
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/hort-realm
+          jwk-set-uri: http://localhost:8180/realms/hort-realm/protocol/openid-connect/certs
