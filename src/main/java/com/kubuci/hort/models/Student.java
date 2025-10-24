@@ -28,7 +28,7 @@ public class Student {
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
-	private Group group;
+	private HortGroup group;
 
 	public Long getId() {
 		return id;
@@ -46,11 +46,11 @@ public class Student {
 		this.person = person;
 	}
 
-	public Group getGroup() {
+	public HortGroup getGroup() {
 		return group;
 	}
 
-	public void setGroup(Group group) {
+	public void setGroup(HortGroup group) {
 		this.group = group;
 	}
 
