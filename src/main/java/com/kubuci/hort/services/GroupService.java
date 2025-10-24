@@ -6,8 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kubuci.hort.dto.GroupDto;
 import com.kubuci.hort.dto.GroupSaveRequest;
 import com.kubuci.hort.dto.GroupUpdateRequest;
-import com.kubuci.hort.models.Group;
-import com.kubuci.hort.models.Tutor;
+import com.kubuci.hort.models.HortGroup;
 import com.kubuci.hort.repositories.GroupRepository;
 import com.kubuci.hort.repositories.TutorRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,7 +28,7 @@ public class GroupService {
 
 	@Transactional(readOnly = true)
 	public GroupDto getById(Long id) {
-		Group g = groupRepository.findById(id)
+		HortGroup g = groupRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + id));
 		return new GroupDto(g.getId(), g.getName());
 	}
@@ -39,7 +38,7 @@ public class GroupService {
 		//Tutor tutor = tutorRepository.findById(req.tutorId())
 		//	.orElseThrow(() -> new EntityNotFoundException("Tutor not found: " + req.tutorId()));
 
-		Group g = new Group();
+		HortGroup g = new HortGroup();
 		g.setName(req.name());
 		//g.setTutor(tutor);
 
@@ -48,7 +47,7 @@ public class GroupService {
 
 	@Transactional
 	public void update(Long id, GroupUpdateRequest req) {
-		Group g = groupRepository.findById(id)
+		HortGroup g = groupRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + id));
 
 		//Tutor tutor = tutorRepository.findById(req.tutorId())

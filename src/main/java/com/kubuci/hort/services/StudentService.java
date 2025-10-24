@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kubuci.hort.dto.CollectorDto;
 import com.kubuci.hort.dto.StudentDto;
 import com.kubuci.hort.dto.StudentSaveRequest;
-import com.kubuci.hort.models.Group;
+import com.kubuci.hort.models.HortGroup;
 import com.kubuci.hort.models.Person;
 import com.kubuci.hort.models.PickupRight;
 import com.kubuci.hort.models.Student;
@@ -98,7 +98,7 @@ public class StudentService {
 		p.setPhone(req.phone());
 		personRepository.save(p);
 
-		Group group = groupRepository.findById(req.groupId())
+		HortGroup group = groupRepository.findById(req.groupId())
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();
