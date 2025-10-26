@@ -40,7 +40,7 @@ public class PickupRight {
 	@Column(name = "valid_from", nullable = false)
 	private LocalDateTime validFrom;
 
-	@Column(name = "valid_until")
+	@Column(name = "valid_until", nullable = true)
 	private LocalDateTime validUntil;
 
 	@Column(name = "allowed_from_time")
@@ -49,6 +49,17 @@ public class PickupRight {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private PermissionStatus status;
+
+	@Column(name = "main_collector", nullable = false)
+	private boolean mainCollector;
+
+	public boolean isMainCollector() {
+		return mainCollector;
+	}
+
+	public void setMainCollector(boolean mainCollector) {
+		this.mainCollector = mainCollector;
+	}
 
 	public Long getId() {
 		return id;

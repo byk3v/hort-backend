@@ -14,5 +14,6 @@ public record CollectorForOnboarding(
 	LocalDateTime validFrom,
 	LocalDateTime validUntil,
 	@NotNull CollectorType type, // "Aqui tengo adulto o alumno", hay que adicionar un boolean MainCollector
-	@NotNull PermissionType permissionType
+	@NotNull PermissionType permissionType,
+	boolean mainCollector
 ) {}

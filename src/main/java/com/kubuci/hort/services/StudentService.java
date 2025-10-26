@@ -1,5 +1,6 @@
 package com.kubuci.hort.services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -14,7 +15,6 @@ import com.kubuci.hort.dto.StudentOnboardingRequest;
 import com.kubuci.hort.dto.StudentOnboardingResponse;
 import com.kubuci.hort.dto.StudentSaveRequest;
 import com.kubuci.hort.enums.PermissionStatus;
-import com.kubuci.hort.enums.PermissionType;
 import com.kubuci.hort.models.Collector;
 import com.kubuci.hort.models.Group;
 import com.kubuci.hort.models.Person;
@@ -74,7 +74,7 @@ public class StudentService {
 				}, Collectors.toCollection(ArrayList::new))
 			));
 
-		// Mantener el orden de studentIds con un LinkedHashMap si quisieras
+		// Mantener el orden de studentIds con un LinkedHashMap
 		var order = new LinkedHashMap<Long, Integer>();
 		for (int i = 0; i < studentIds.size(); i++) {
 			order.put(studentIds.get(i), i);
@@ -162,21 +162,21 @@ public class StudentService {
 
 			collectorEntities.add(collector);
 
-			// PickupRight con fechas específicas de este collector
 			PickupRight right = new PickupRight();
 			right.setStudent(student);
 			right.setCollector(collector);
 			right.setType(cReq.permissionType());
-			right.setValidFrom(cReq.validFrom());
-			right.setValidUntil(cReq.validUntil());
 			right.setStatus(PermissionStatus.ACTIVE);
-
+			LocalDateTime effectiveFrom = cReq.validFrom() != null ? cReq.validFrom() : LocalDateTime.now();
+			LocalDateTime effectiveUntil = cReq.validUntil() != null ? cReq.validUntil() : null;
+			right.setValidFrom(effectiveFrom);
+			right.setValidUntil(effectiveUntil);
+			right.setMainCollector(cReq.mainCollector());
 			rightsToSave.add(right);
 		}
 
 		pickupRightRepository.saveAll(rightsToSave);
 
-		//construir respuesta
 		List<Long> collectorIds = collectorEntities
 			.stream()
 			.map(Collector::getId)
