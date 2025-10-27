@@ -1,9 +1,9 @@
 package com.kubuci.hort.controllers;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,9 +25,9 @@ public class CheckOutController {
 	private final CheckOutService service;
 
 	@PostMapping
-	public ResponseEntity<Long> create(@Valid @RequestBody CheckOutCreateRequest req) {
-		Long id = service.create(req);
-		return ResponseEntity.created(URI.create("/api/checkout/" + id)).body(id);
+	public ResponseEntity<Void> create(@Valid @RequestBody CheckOutCreateRequest req) {
+		service.registerCheckout(req);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@GetMapping("/search")

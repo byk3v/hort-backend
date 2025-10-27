@@ -9,5 +9,6 @@ public record CheckOutStudentInfo(
 	String groupName,
 	boolean canLeaveAloneToday,
 	String allowedToLeaveFromTime,
+	Long selfDismissalId,
 	List<CheckOutCollectorInfo> allowedCollectors
 ) {}

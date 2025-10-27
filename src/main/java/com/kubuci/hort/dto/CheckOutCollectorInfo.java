@@ -6,5 +6,6 @@ public record CheckOutCollectorInfo(
 	String lastName,
 	String phone,
 	boolean mainCollector,
-	String allowedFromTime
+	String allowedFromTime,
+	Long pickupRightId
 ) {}

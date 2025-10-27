@@ -35,50 +35,46 @@ public class CheckOutService {
 	private final SelfDismissalRepository selfDismissalRepo;
 
 	@Transactional
-	public Long create(CheckOutCreateRequest req) {
+	public void registerCheckout(CheckOutCreateRequest req) {
 		var student = studentRepo.findById(req.studentId())
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
-		LocalDateTime at = (req.occurredAt() != null) ? req.occurredAt() : LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now();
 
-		var entity = new CheckOut();
-		entity.setStudent(student);
-		entity.setOccurredAt(at);
-		entity.setComment(req.comment());
-		entity.setRecordedByUserId(req.recordedByUserId());
+		CheckOut abmeldung = new CheckOut();
+		abmeldung.setStudent(student);
+		abmeldung.setComment(req.comment());
+		abmeldung.setOccurredAt(now);
 
-		if (req.collectorType() == CollectorType.COLLECTOR) {
-			if (req.collectorId() == null) {
-				throw new IllegalArgumentException("collectorId required when collectorType=COLLECTOR");
-			}
-			var collector = collectorRepo.findById(req.collectorId())
-				.orElseThrow(() -> new EntityNotFoundException("Collector not found: " + req.collectorId()));
-			// validar permiso activo
-			var rights = pickupRightRepo.findActiveFor(student.getId(), at);
-			if (rights.isEmpty()) {
-				throw new IllegalStateException("No active PickupRight for student/collector at given time");
-			}
-			entity.setCollectorType(CollectorType.COLLECTOR);
-			entity.setCollector(collector);
-			entity.setPickupRight(rights.getFirst());
-			entity.setSelfDismissal(null);
+		if (Boolean.TRUE.equals(req.selfDismissal())) {
+			// caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId
+			abmeldung.setCollector(null);
+			abmeldung.setPickupRight(null);
+			abmeldung.setCollectorType(CollectorType.STUDENT);
 
-		} else { // STUDENT (self-dismissal)
-			// collectorId no debe venir
-			if (req.collectorId() != null) {
-				throw new IllegalArgumentException("collectorId must be null when collectorType=STUDENT");
+			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+			SelfDismissal dismissal = dismissalOpt.orElse(null);
+			abmeldung.setSelfDismissal(dismissal);
+
+		} else {
+			// caso: lo recoge un adulto autorizado
+			if (req.collectorId() == null || req.pickupRightId() == null) {
+				throw new IllegalArgumentException("collectorId and pickupRightId required for non-selfDismissal checkout");
 			}
-			var perms = selfDismissalRepo.findActiveFor(student.getId(), at);
-			if (perms.isEmpty()) {
-				throw new IllegalStateException("No active SelfDismissal permission at given time");
-			}
-			entity.setCollectorType(CollectorType.STUDENT);
-			entity.setCollector(null);
-			entity.setPickupRight(null);
-			entity.setSelfDismissal(perms.getFirst());
+
+			Collector collector = collectorRepo.findById(req.collectorId())
+				.orElseThrow(() -> new EntityNotFoundException("Collector not found " + req.collectorId()));
+
+			PickupRight pr = pickupRightRepo.findById(req.pickupRightId())
+				.orElseThrow(() -> new EntityNotFoundException("PickupRight not found " + req.pickupRightId()));
+
+			abmeldung.setCollector(collector);
+			abmeldung.setPickupRight(pr);
+			abmeldung.setSelfDismissal(null);
+			abmeldung.setCollectorType(collector.getCollectorType());
 		}
 
-		return repo.save(entity).getId();
+		repo.save(abmeldung);
 	}
 
 	@Transactional(readOnly = true)
@@ -121,7 +117,7 @@ public class CheckOutService {
 		}
 
 
-		List<CheckOutStudentInfo> result = matches.stream().map(student -> {
+		List<CheckOutStudentInfo> studentsInfo = matches.stream().map(student -> {
 			Person p = student.getPerson();
 			String groupName = student.getGroup() != null ? student.getGroup().getName() : null;
 
@@ -139,21 +135,24 @@ public class CheckOutService {
 						cp.getPhone(),
 						right.isMainCollector(),
 						right.getAllowedFromTime() != null
-							? right.getAllowedFromTime().toString() // "HH:mm:ss"
-							: null
+							? right.getAllowedFromTime().toString().substring(0,5)
+							: null,
+						right.getId() // pickupRightId
 					);
 				})
 				.toList();
 
-			// 3. self-dismissal válido hoy
-			SelfDismissal dismissal = selfDismissalRepo
-				.findActiveForStudentAt(student.getId(), now)
+			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+
+			boolean canLeaveAloneToday = dismissalOpt.isPresent();
+			String allowedToLeaveFromTime = dismissalOpt
+				.map(SelfDismissal::getAllowedFromTime)
+				.map(t -> t.toString().substring(0,5))
 				.orElse(null);
 
-			boolean canLeaveAloneToday = dismissal != null;
-			String allowedToLeaveFromTime = (dismissal != null && dismissal.getAllowedFromTime() != null)
-				? dismissal.getAllowedFromTime().toString()
-				: null;
+			Long selfDismissalId = dismissalOpt
+				.map(SelfDismissal::getId)
+				.orElse(null);
 
 			return new CheckOutStudentInfo(
 				student.getId(),
@@ -162,11 +161,13 @@ public class CheckOutService {
 				groupName,
 				canLeaveAloneToday,
 				allowedToLeaveFromTime,
+				selfDismissalId,
 				allowedCollectors
+
 			);
 		}).toList();
 
-		return new CheckOutSearchResponse(result);
+		return new CheckOutSearchResponse(studentsInfo);
 	}
 
 	private CheckOutDto toDto(CheckOut c) {
