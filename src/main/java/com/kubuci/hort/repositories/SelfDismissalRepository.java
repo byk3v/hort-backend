@@ -2,6 +2,7 @@ package com.kubuci.hort.repositories;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,17 +20,14 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, Lo
         """)
     List<SelfDismissal> findActiveFor(@Param("studentId") Long studentId, @Param("at") LocalDateTime at);
 
-	List<SelfDismissal> findByStudent_Id(Long studentId);
+    List<SelfDismissal> findByStudent_Id(Long studentId);
 
-	@Query("""
-        select sd
-        from SelfDismissal sd
-        where sd.student.id = :studentId
-          and sd.validFrom <= :now
-          and (sd.validUntil is null or sd.validUntil >= :now)
-    """)
-	Optional<SelfDismissal> findActiveForStudentAt(
-		@Param("studentId") Long studentId,
-		@Param("now") LocalDateTime now
-	);
+    @Query("""
+            select sd
+            from SelfDismissal sd
+            where sd.student.id = :studentId
+              and sd.validFrom <= :now
+              and (sd.validUntil is null or sd.validUntil >= :now)
+        """)
+    Optional<SelfDismissal> findActiveForStudentAt(@Param("studentId") Long studentId, @Param("now") LocalDateTime now);
 }
