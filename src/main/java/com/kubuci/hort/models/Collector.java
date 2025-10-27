@@ -13,7 +13,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "collector")
 public class Collector {
@@ -30,27 +34,4 @@ public class Collector {
 	@Column(name = "collector_type", nullable = false, length = 16)
 	private CollectorType collectorType;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
-	public CollectorType getCollectorType() {
-		return collectorType;
-	}
-
-	public void setCollectorType(CollectorType collectorType) {
-		this.collectorType = collectorType;
-	}
 }
