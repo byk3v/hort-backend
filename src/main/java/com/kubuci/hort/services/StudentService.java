@@ -127,7 +127,7 @@ public class StudentService {
 		studentData.setAddress(req.student().address());
 		personRepository.save(studentData);
 
-		Group group = groupRepository.findById(Long.valueOf(req.groupId()))
+		Group group = groupRepository.findById(req.groupId())
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();

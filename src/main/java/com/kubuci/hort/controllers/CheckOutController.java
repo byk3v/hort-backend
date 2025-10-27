@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kubuci.hort.dto.CheckOutCreateRequest;
 import com.kubuci.hort.dto.CheckOutDto;
+import com.kubuci.hort.dto.CheckOutSearchResponse;
 import com.kubuci.hort.services.CheckOutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/checkouts")
+@RequestMapping("/api/checkout")
 @RequiredArgsConstructor
 public class CheckOutController {
 	private final CheckOutService service;
@@ -26,7 +27,17 @@ public class CheckOutController {
 	@PostMapping
 	public ResponseEntity<Long> create(@Valid @RequestBody CheckOutCreateRequest req) {
 		Long id = service.create(req);
-		return ResponseEntity.created(URI.create("/api/checkouts/" + id)).body(id);
+		return ResponseEntity.created(URI.create("/api/checkout/" + id)).body(id);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<CheckOutSearchResponse> search(
+		@RequestParam("q") String q
+	) {
+		if (q == null || q.trim().length() < 2) {
+			return ResponseEntity.ok(new CheckOutSearchResponse(List.of()));
+		}
+		return ResponseEntity.ok(service.search(q.trim()));
 	}
 
 	@GetMapping("/by-student")

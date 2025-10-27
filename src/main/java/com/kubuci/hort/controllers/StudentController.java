@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kubuci.hort.dto.StudentDto;
 import com.kubuci.hort.dto.StudentOnboardingRequest;
 import com.kubuci.hort.dto.StudentOnboardingResponse;
-import com.kubuci.hort.dto.StudentSaveRequest;
 import com.kubuci.hort.services.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

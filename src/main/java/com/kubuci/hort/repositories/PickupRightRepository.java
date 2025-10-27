@@ -44,4 +44,18 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, Long> 
 	List<PickupRight> findByStudent_Id(Long studentId);
 
 	List<PickupRight> findByCollector_Id(Long collectorId);
+
+	@Query("""
+        select pr
+        from PickupRight pr
+        join fetch pr.collector c
+        join fetch c.person cp
+        where pr.student.id = :studentId
+          and pr.validFrom <= :now
+          and (pr.validUntil is null or pr.validUntil >= :now)
+    """)
+	List<PickupRight> findActiveForStudentAt(
+		@Param("studentId") Long studentId,
+		@Param("now") LocalDateTime now
+	);
 }

@@ -1,8 +1,5 @@
 package com.kubuci.hort.dto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
