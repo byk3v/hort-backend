@@ -2,9 +2,12 @@ package com.kubuci.hort.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
@@ -14,6 +17,10 @@ public class Person {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "hort_id", nullable = false)
+	private Hort hort;
 
 	@NotBlank
 	@Column(name = "first_name", nullable = false, length = 120)
@@ -35,6 +42,14 @@ public class Person {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Hort getHort() {
+		return hort;
+	}
+
+	public void setHort(Hort hort) {
+		this.hort = hort;
 	}
 
 	public String getFirstName() {
