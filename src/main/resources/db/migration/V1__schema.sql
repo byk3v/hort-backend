@@ -5,10 +5,13 @@ SET search_path TO hort;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'collector_type_enum') THEN
-    CREATE TYPE collector_type_enum AS ENUM ('ADULT','STUDENT');
+    CREATE TYPE collector_type_enum AS ENUM ('COLLECTOR','STUDENT'); -- ajustado a CollectorType.java
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pickup_type_enum') THEN
-    CREATE TYPE pickup_type_enum AS ENUM ('DAILY','PERMANENT');
+    CREATE TYPE pickup_type_enum AS ENUM ('PERMANENT','DAILY'); -- orden según Java PermissionType
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'permission_status_enum') THEN
+    CREATE TYPE permission_status_enum AS ENUM ('ACTIVE','REVOKED','EXPIRED');
   END IF;
 END $$;
 
@@ -29,6 +32,12 @@ CREATE TABLE IF NOT EXISTS person (
   address    VARCHAR(250)
 );
 
+CREATE TABLE IF NOT EXISTS tutor (
+  id        BIGSERIAL PRIMARY KEY,
+  person_id BIGINT NOT NULL REFERENCES person(id),
+  CONSTRAINT uk_tutor_person UNIQUE (person_id)
+);
+
 CREATE TABLE IF NOT EXISTS hort_group (
   id      BIGSERIAL PRIMARY KEY,
   hort_id BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
@@ -37,12 +46,12 @@ CREATE TABLE IF NOT EXISTS hort_group (
 CREATE INDEX IF NOT EXISTS idx_hort_group_hort_name ON hort_group(hort_id, name);
 
 CREATE TABLE IF NOT EXISTS student (
-  allowed_time_to_leave DATE,
-  can_leave_alone       BOOLEAN NOT NULL,
-  group_id              BIGINT NOT NULL REFERENCES hort_group(id),
   id                    BIGSERIAL PRIMARY KEY,
   hort_id               BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
   person_id             BIGINT NOT NULL REFERENCES person(id),
+  group_id              BIGINT NOT NULL REFERENCES hort_group(id),
+  allowed_time_to_leave DATE,
+  can_leave_alone       BOOLEAN NOT NULL,
   CONSTRAINT uk_student_person UNIQUE (person_id)
 );
 CREATE INDEX IF NOT EXISTS idx_student_hort  ON student(hort_id);
@@ -57,25 +66,43 @@ CREATE TABLE IF NOT EXISTS collector (
 CREATE INDEX IF NOT EXISTS idx_collector_hort ON collector(hort_id);
 
 CREATE TABLE IF NOT EXISTS pickup_right (
-  collector_id BIGINT NOT NULL REFERENCES collector(id),
-  id           BIGSERIAL PRIMARY KEY,
-  student_id   BIGINT NOT NULL REFERENCES student(id),
-  hort_id      BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
-  type         pickup_type_enum NOT NULL
+  id                BIGSERIAL PRIMARY KEY,
+  hort_id           BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
+  student_id        BIGINT NOT NULL REFERENCES student(id),
+  collector_id      BIGINT NOT NULL REFERENCES collector(id),
+  type              pickup_type_enum NOT NULL,
+  valid_from        TIMESTAMP NOT NULL,
+  valid_until       TIMESTAMP NULL,
+  allowed_from_time TIME NULL,
+  status            permission_status_enum NOT NULL,
+  main_collector    BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX IF NOT EXISTS idx_pickup_right_hort    ON pickup_right(hort_id);
 CREATE INDEX IF NOT EXISTS idx_pickup_right_student ON pickup_right(student_id);
 
-CREATE TABLE IF NOT EXISTS check_out (
-  date_time    DATE NOT NULL,
-  id           BIGSERIAL PRIMARY KEY,
-  id_collector BIGINT NOT NULL REFERENCES collector(id),
-  id_student   BIGINT NOT NULL REFERENCES student(id),
-  hort_id      BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
-  comment      VARCHAR(500),
-  user_id      VARCHAR(255) NOT NULL
+CREATE TABLE IF NOT EXISTS self_dismissal (
+  id                BIGSERIAL PRIMARY KEY,
+  student_id        BIGINT NOT NULL REFERENCES student(id),
+  valid_from        TIMESTAMP NOT NULL,
+  valid_until       TIMESTAMP NULL,
+  allowed_from_time TIME NULL,
+  status            permission_status_enum NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_checkout_student_date ON check_out (id_student, date_time);
+CREATE INDEX IF NOT EXISTS idx_self_dismissal_student ON self_dismissal(student_id);
+
+CREATE TABLE IF NOT EXISTS check_out (
+  id                   BIGSERIAL PRIMARY KEY,
+  hort_id              BIGINT NOT NULL REFERENCES hort(id) ON DELETE RESTRICT,
+  student_id           BIGINT NOT NULL REFERENCES student(id),
+  collector_type       collector_type_enum NOT NULL,
+  collector_id         BIGINT NULL REFERENCES collector(id),
+  pickup_right_id      BIGINT NULL REFERENCES pickup_right(id),
+  self_dismissal_id    BIGINT NULL REFERENCES self_dismissal(id),
+  occurred_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+  comment              VARCHAR(500),
+  recorded_by_user_id  VARCHAR(255) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_checkout_student_date ON check_out (student_id, occurred_at);
 CREATE INDEX IF NOT EXISTS idx_checkout_hort         ON check_out (hort_id);
 
 -- ===== RLS por hort_id (políticas explícitas, sin nombres reservados) =====
