@@ -12,25 +12,26 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="hort_group")
+@Table(name = "hort_group")
 public class HortGroup {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "name", length = 160, nullable = false)
-	private String name;
+    @Column(name = "name", length = 160, nullable = false)
+    private String name;
 
-	//@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	//@JoinColumn(name = "id_tutor", nullable = false, foreignKey = @ForeignKey(name = "fk_group_tutor"))
-	//private Tutor tutor;
+    // @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    // @JoinColumn(name = "id_tutor", nullable = false, foreignKey =
+    // @ForeignKey(name = "fk_group_tutor"))
+    // private Tutor tutor;
 
-	//public Tutor getTutor() {
-	//	return tutor;
-	//}
+    // public Tutor getTutor() {
+    // return tutor;
+    // }
 
-	//public void setTutor(Tutor tutor) {
-	//	this.tutor = tutor;
-	//}
+    // public void setTutor(Tutor tutor) {
+    // this.tutor = tutor;
+    // }
 }
