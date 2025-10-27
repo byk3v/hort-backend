@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import com.kubuci.hort.enums.PermissionStatus;
+
 import com.kubuci.hort.models.SelfDismissal;
 
 public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, Long> {
@@ -19,7 +19,7 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, Lo
         """)
     List<SelfDismissal> findActiveFor(@Param("studentId") Long studentId, @Param("at") LocalDateTime at);
 
-	List<SelfDismissal> findByStudent_Id(Long studentId);
+    List<SelfDismissal> findByStudent_Id(Long studentId);
 
 	@Query("""
         select sd

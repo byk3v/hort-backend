@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/checkout")
 @RequiredArgsConstructor
 public class CheckOutController {
-	private final CheckOutService service;
+    private final CheckOutService service;
 
 	@PostMapping("/confirm")
 	public ResponseEntity<Void> create(@Valid @RequestBody CheckOutCreateRequest req) {

@@ -41,9 +41,9 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, Long> 
         """)
     List<PickupRight> findActiveFor(@Param("studentId") Long studentId, @Param("at") LocalDateTime at);
 
-	List<PickupRight> findByStudent_Id(Long studentId);
+    List<PickupRight> findByStudent_Id(Long studentId);
 
-	List<PickupRight> findByCollector_Id(Long collectorId);
+    List<PickupRight> findByCollector_Id(Long collectorId);
 
 	@Query("""
         select pr
