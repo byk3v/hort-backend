@@ -1,6 +1,9 @@
 package com.kubuci.hort.models;
 
 import java.time.LocalDateTime;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import com.kubuci.hort.enums.CollectorType;
 import jakarta.persistence.Column;
@@ -16,6 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "check_out")
 public class CheckOut {
@@ -54,75 +59,4 @@ public class CheckOut {
 	@Column(name = "recorded_by_user_id")//hasta que esten los usuarios
 	private String recordedByUserId;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Student getStudent() {
-		return student;
-	}
-
-	public void setStudent(Student student) {
-		this.student = student;
-	}
-
-	public CollectorType getCollectorType() {
-		return collectorType;
-	}
-
-	public void setCollectorType(CollectorType collectorType) {
-		this.collectorType = collectorType;
-	}
-
-	public Collector getCollector() {
-		return collector;
-	}
-
-	public void setCollector(Collector collector) {
-		this.collector = collector;
-	}
-
-	public LocalDateTime getOccurredAt() {
-		return occurredAt;
-	}
-
-	public void setOccurredAt(LocalDateTime occurredAt) {
-		this.occurredAt = occurredAt;
-	}
-
-	public PickupRight getPickupRight() {
-		return pickupRight;
-	}
-
-	public void setPickupRight(PickupRight pickupRight) {
-		this.pickupRight = pickupRight;
-	}
-
-	public SelfDismissal getSelfDismissal() {
-		return selfDismissal;
-	}
-
-	public void setSelfDismissal(SelfDismissal selfDismissal) {
-		this.selfDismissal = selfDismissal;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-
-	public String getRecordedByUserId() {
-		return recordedByUserId;
-	}
-
-	public void setRecordedByUserId(String recordedByUserId) {
-		this.recordedByUserId = recordedByUserId;
-	}
 }

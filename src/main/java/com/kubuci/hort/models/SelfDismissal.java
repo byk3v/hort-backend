@@ -12,10 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "self_dismissal")
 public class SelfDismissal {
@@ -40,51 +44,4 @@ public class SelfDismissal {
 	@Column(nullable = false)
 	private PermissionStatus status;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Student getStudent() {
-		return student;
-	}
-
-	public void setStudent(Student student) {
-		this.student = student;
-	}
-
-	public LocalDateTime getValidFrom() {
-		return validFrom;
-	}
-
-	public void setValidFrom(LocalDateTime validFrom) {
-		this.validFrom = validFrom;
-	}
-
-	public LocalDateTime getValidUntil() {
-		return validUntil;
-	}
-
-	public void setValidUntil(LocalDateTime validUntil) {
-		this.validUntil = validUntil;
-	}
-
-	public LocalTime getAllowedFromTime() {
-		return allowedFromTime;
-	}
-
-	public void setAllowedFromTime(LocalTime allowedFromTime) {
-		this.allowedFromTime = allowedFromTime;
-	}
-
-	public PermissionStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(PermissionStatus status) {
-		this.status = status;
-	}
 }

@@ -11,7 +11,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "student", uniqueConstraints = {
 	@UniqueConstraint(name = "uk_student_person", columnNames = "person_id")
@@ -29,30 +33,6 @@ public class Student {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
 	private HortGroup group;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
-	public HortGroup getGroup() {
-		return group;
-	}
-
-	public void setGroup(HortGroup group) {
-		this.group = group;
-	}
 
 
 }

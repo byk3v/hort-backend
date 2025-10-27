@@ -7,7 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "hort", uniqueConstraints = {
     @UniqueConstraint(name = "uk_hort_name", columnNames = {"name"})
@@ -21,20 +25,5 @@ public class Hort {
     @Column(name = "name", nullable = false, length = 160)
     private String name;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
 

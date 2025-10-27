@@ -16,7 +16,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "pickup_right")
 public class PickupRight {
@@ -53,75 +57,4 @@ public class PickupRight {
 	@Column(name = "main_collector", nullable = false)
 	private boolean mainCollector;
 
-	public boolean isMainCollector() {
-		return mainCollector;
-	}
-
-	public void setMainCollector(boolean mainCollector) {
-		this.mainCollector = mainCollector;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public PermissionType getType() {
-		return type;
-	}
-
-	public void setType(PermissionType type) {
-		this.type = type;
-	}
-
-	public Student getStudent() {
-		return student;
-	}
-
-	public void setStudent(Student student) {
-		this.student = student;
-	}
-
-	public Collector getCollector() {
-		return collector;
-	}
-
-	public void setCollector(Collector collector) {
-		this.collector = collector;
-	}
-
-	public LocalDateTime getValidFrom() {
-		return validFrom;
-	}
-
-	public void setValidFrom(LocalDateTime validFrom) {
-		this.validFrom = validFrom;
-	}
-
-	public LocalDateTime getValidUntil() {
-		return validUntil;
-	}
-
-	public void setValidUntil(LocalDateTime validUntil) {
-		this.validUntil = validUntil;
-	}
-
-	public LocalTime getAllowedFromTime() {
-		return allowedFromTime;
-	}
-
-	public void setAllowedFromTime(LocalTime allowedFromTime) {
-		this.allowedFromTime = allowedFromTime;
-	}
-
-	public PermissionStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(PermissionStatus status) {
-		this.status = status;
-	}
 }
