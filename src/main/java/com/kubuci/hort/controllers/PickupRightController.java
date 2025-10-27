@@ -22,8 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/permissions")
 @RequiredArgsConstructor
 public class PickupRightController {
-
-	private final PickupRightService service;
+    private final PickupRightService service;
 
 	@GetMapping
 	public ResponseEntity<List<PermissionViewDto>> list(
@@ -38,19 +37,20 @@ public class PickupRightController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
-	@PutMapping("/{id}/revoke")
-	public ResponseEntity<Void> revoke(@PathVariable Long id) {
-		service.revoke(id);
-		return ResponseEntity.noContent().build();
-	}
+    @PutMapping("/{id}/revoke")
+    public ResponseEntity<Void> revoke(@PathVariable Long id) {
+        service.revoke(id);
+        return ResponseEntity.noContent()
+                .build();
+    }
 
-	@GetMapping("/by-student")
-	public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam Long studentId) {
-		return ResponseEntity.ok(service.listByStudent(studentId));
-	}
+    @GetMapping("/by-student")
+    public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam Long studentId) {
+        return ResponseEntity.ok(service.listByStudent(studentId));
+    }
 
-	@GetMapping("/by-collector")
-	public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam Long collectorId) {
-		return ResponseEntity.ok(service.listByCollector(collectorId));
-	}
+    @GetMapping("/by-collector")
+    public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam Long collectorId) {
+        return ResponseEntity.ok(service.listByCollector(collectorId));
+    }
 }

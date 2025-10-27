@@ -13,9 +13,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "hort", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_hort_name", columnNames = {"name"})
-})
+@Table(name = "hort", uniqueConstraints = { @UniqueConstraint(name = "uk_hort_name", columnNames = { "name" }) })
 public class Hort {
 
     @Id
@@ -26,4 +24,3 @@ public class Hort {
     private String name;
 
 }
-

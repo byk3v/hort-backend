@@ -1,8 +1,7 @@
 package com.kubuci.hort.services;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.kubuci.hort.dto.NewPermissionCollectorInlineDto;
@@ -37,43 +36,49 @@ public class PickupRightService {
 	private final CollectorRepository collectorRepo;
 	private final PersonRepository personRepository;
 
-	@Transactional
-	public Long create(PickupRightCreateRequest req) {
-		var student = studentRepo.findById(req.studentId())
-			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
-		var collector = collectorRepo.findById(req.collectorId())
-			.orElseThrow(() -> new EntityNotFoundException("Collector not found: " + req.collectorId()));
+    @Transactional
+    public Long create(PickupRightCreateRequest req) {
+        var student = studentRepo.findById(req.studentId())
+                .orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
+        var collector = collectorRepo.findById(req.collectorId())
+                .orElseThrow(() -> new EntityNotFoundException("Collector not found: " + req.collectorId()));
 
-		var pr = new PickupRight();
-		pr.setStudent(student);
-		pr.setCollector(collector);
-		pr.setType(req.type());
-		pr.setValidFrom(req.validFrom());
-		pr.setValidUntil(req.validUntil());
-		pr.setStatus(PermissionStatus.ACTIVE);
-		return repo.save(pr).getId();
-	}
+        var pr = new PickupRight();
+        pr.setStudent(student);
+        pr.setCollector(collector);
+        pr.setType(req.type());
+        pr.setValidFrom(req.validFrom());
+        pr.setValidUntil(req.validUntil());
+        pr.setStatus(PermissionStatus.ACTIVE);
+        return repo.save(pr)
+                .getId();
+    }
 
-	@Transactional
-	public void revoke(Long id) {
-		var pr = repo.findById(id)
-			.orElseThrow(() -> new EntityNotFoundException("PickupRight not found: " + id));
-		if (pr.getStatus() == PermissionStatus.REVOKED) {
-			return;
-		}
-		pr.setStatus(PermissionStatus.REVOKED);
-		repo.save(pr);
-	}
+    @Transactional
+    public void revoke(Long id) {
+        var pr = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("PickupRight not found: " + id));
+        if (pr.getStatus() == PermissionStatus.REVOKED)
+            return;
+        pr.setStatus(PermissionStatus.REVOKED);
+        repo.save(pr);
+    }
 
-	@Transactional(readOnly = true)
-	public List<PickupRightDto> listByStudent(Long studentId) {
-		return repo.findByStudent_Id(studentId).stream().map(this::toDto).toList();
-	}
+    @Transactional(readOnly = true)
+    public List<PickupRightDto> listByStudent(Long studentId) {
+        return repo.findByStudent_Id(studentId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 
-	@Transactional(readOnly = true)
-	public List<PickupRightDto> listByCollector(Long collectorId) {
-		return repo.findByCollector_Id(collectorId).stream().map(this::toDto).toList();
-	}
+    @Transactional(readOnly = true)
+    public List<PickupRightDto> listByCollector(Long collectorId) {
+        return repo.findByCollector_Id(collectorId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 
 	private PickupRightDto toDto(PickupRight p) {
 		return new PickupRightDto(

@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CollectorSaveRequest(
-	@NotNull Long personId,
-	@NotBlank String collectorType
-) {
+    @NotNull Long personId,
+    @NotBlank String collectorType) {
 
 }

@@ -16,18 +16,16 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "tutor", uniqueConstraints = {
-	@UniqueConstraint(name = "uk_tutor_person", columnNames = "person_id")
-})
+@Table(name = "tutor", uniqueConstraints = { @UniqueConstraint(name = "uk_tutor_person", columnNames = "person_id") })
 
 public class Tutor {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_tutor_person"))
-	private Person person;
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_tutor_person"))
+    private Person person;
 
 }

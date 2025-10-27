@@ -1,6 +1,7 @@
 package com.kubuci.hort.models;
 
 import com.kubuci.hort.enums.CollectorType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,16 +23,16 @@ import lombok.Setter;
 @Table(name = "collector")
 public class Collector {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_collector_person"))
-	private Person person;
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_collector_person"))
+    private Person person;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "collector_type", nullable = false, length = 16)
-	private CollectorType collectorType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "collector_type", nullable = false, length = 16)
+    private CollectorType collectorType;
 
 }
