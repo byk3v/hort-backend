@@ -1,6 +1,5 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import com.kubuci.hort.enums.CollectorType;
@@ -52,7 +51,7 @@ public class CheckOut {
 	@Column(name = "comment", length = 500)
 	private String comment;
 
-	@Column(name = "recorded_by_user_id", nullable = false)
+	@Column(name = "recorded_by_user_id")//hasta que esten los usuarios
 	private String recordedByUserId;
 
 	public Long getId() {

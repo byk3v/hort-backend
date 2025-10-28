@@ -33,6 +33,7 @@ public class CheckOutService {
 	private final CollectorRepository collectorRepo;
 	private final PickupRightRepository pickupRightRepo;
 	private final SelfDismissalRepository selfDismissalRepo;
+	private final CheckOutRepository checkOutRepository;
 
 	@Transactional
 	public void registerCheckout(CheckOutCreateRequest req) {
@@ -154,6 +155,8 @@ public class CheckOutService {
 				.map(SelfDismissal::getId)
 				.orElse(null);
 
+			boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
+
 			return new CheckOutStudentInfo(
 				student.getId(),
 				p.getFirstName(),
@@ -162,8 +165,8 @@ public class CheckOutService {
 				canLeaveAloneToday,
 				allowedToLeaveFromTime,
 				selfDismissalId,
+				alreadyCheckedOut,
 				allowedCollectors
-
 			);
 		}).toList();
 

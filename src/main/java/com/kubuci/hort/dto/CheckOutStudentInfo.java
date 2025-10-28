@@ -10,5 +10,6 @@ public record CheckOutStudentInfo(
 	boolean canLeaveAloneToday,
 	String allowedToLeaveFromTime,
 	Long selfDismissalId,
+	boolean checkedOutToday,
 	List<CheckOutCollectorInfo> allowedCollectors
 ) {}

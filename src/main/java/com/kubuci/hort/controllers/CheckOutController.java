@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class CheckOutController {
 	private final CheckOutService service;
 
-	@PostMapping
+	@PostMapping("/confirm")
 	public ResponseEntity<Void> create(@Valid @RequestBody CheckOutCreateRequest req) {
 		service.registerCheckout(req);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
