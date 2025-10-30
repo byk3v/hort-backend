@@ -1,6 +1,7 @@
 package com.kubuci.hort.controllers;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class StudentController {
     // GET /api/students?name=ana&groupId=3
     @GetMapping
     public ResponseEntity<List<StudentDto>> list(@RequestParam(required = false) String name,
-            @RequestParam(required = false) Long groupId) {
+            @RequestParam(required = false) UUID groupId) {
         return ResponseEntity.ok(studentService.list(name, groupId));
     }
 

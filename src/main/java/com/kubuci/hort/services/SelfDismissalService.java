@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ public class SelfDismissalService {
     private final StudentRepository studentRepo;
 
     @Transactional
-    public Long create(SelfDismissalCreateRequest req) {
+    public UUID create(SelfDismissalCreateRequest req) {
         var student = studentRepo.findById(req.studentId())
                 .orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
@@ -36,7 +37,7 @@ public class SelfDismissalService {
     }
 
     @Transactional
-    public void revoke(Long id) {
+    public void revoke(UUID id) {
         var s = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("SelfDismissal not found: " + id));
         if (s.getStatus() == PermissionStatus.REVOKED)
@@ -46,7 +47,7 @@ public class SelfDismissalService {
     }
 
     @Transactional(readOnly = true)
-    public List<SelfDismissalDto> listByStudent(Long studentId) {
+    public List<SelfDismissalDto> listByStudent(UUID studentId) {
         return repo.findByStudent_Id(studentId)
                 .stream()
                 .map(this::toDto)

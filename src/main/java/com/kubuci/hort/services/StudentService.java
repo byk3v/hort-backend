@@ -1,10 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -42,12 +39,12 @@ public class StudentService {
     private final CollectorRepository collectorRepository;
 
     @Transactional(readOnly = true)
-    public List<StudentDto> list(String name, Long groupId) {
+    public List<StudentDto> list(String name, UUID groupId) {
         // Paso 1: obtener IDs filtrados (para luego cargar collectors en bloque)
         final String nameFilter = (name == null || name.isBlank())
                 ? null
                 : name.trim();
-        final List<Long> studentIds = (nameFilter == null && groupId == null)
+        final List<UUID> studentIds = (nameFilter == null && groupId == null)
                 ? studentRepository.findAll()
                         .stream()
                         .map(Student::getId)
@@ -66,7 +63,7 @@ public class StudentService {
         final List<PickupRight> rights = pickupRightRepository.findAllByStudentIdsWithCollectorPerson(studentIds);
 
         // Mapear studentId -> collectors
-        final HashMap<Long, List<CollectorDto>> collectorsByStudent = rights.stream()
+        final HashMap<UUID, List<CollectorDto>> collectorsByStudent = rights.stream()
                 .collect(Collectors.groupingBy(pr -> pr.getStudent()
                         .getId(), HashMap::new, Collectors.mapping(pr -> {
                             var cp = pr.getCollector()
@@ -79,7 +76,7 @@ public class StudentService {
                         }, Collectors.toCollection(ArrayList::new))));
 
         // Mantener el orden de studentIds con un LinkedHashMap
-        var order = new LinkedHashMap<Long, Integer>();
+        var order = new LinkedHashMap<UUID, Integer>();
         for (int i = 0; i < studentIds.size(); i++) {
             order.put(studentIds.get(i), i);
         }
@@ -98,7 +95,7 @@ public class StudentService {
     }
 
     @Transactional
-    public Long save(StudentSaveRequest req) {
+    public UUID save(StudentSaveRequest req) {
         Person p = new Person();
         p.setFirstName(req.firstName());
         p.setLastName(req.lastName());
@@ -128,7 +125,7 @@ public class StudentService {
                 .address());
         personRepository.save(studentData);
 
-        HortGroup group = groupRepository.findById(Long.valueOf(req.groupId()))
+        HortGroup group = groupRepository.findById(req.groupId())
                 .orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
         Student student = new Student();
@@ -181,11 +178,11 @@ public class StudentService {
 
         pickupRightRepository.saveAll(rightsToSave);
 
-        List<Long> collectorIds = collectorEntities.stream()
+        List<UUID> collectorIds = collectorEntities.stream()
                 .map(Collector::getId)
                 .toList();
 
-        List<Long> pickupRightIds = rightsToSave.stream()
+        List<UUID> pickupRightIds = rightsToSave.stream()
                 .map(PickupRight::getId)
                 .toList();
 

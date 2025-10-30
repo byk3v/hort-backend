@@ -3,6 +3,7 @@ package com.kubuci.hort.services;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,7 @@ public class CheckOutService {
     }
 
     @Transactional(readOnly = true)
-    public List<CheckOutDto> listByStudent(Long studentId) {
+    public List<CheckOutDto> listByStudent(UUID studentId) {
         return repo.findByStudent_IdOrderByOccurredAtDesc(studentId)
                 .stream()
                 .map(this::toDto)
@@ -92,7 +93,7 @@ public class CheckOutService {
     }
 
     @Transactional(readOnly = true)
-    public List<CheckOutDto> listByStudentAndDay(Long studentId, LocalDate day) {
+    public List<CheckOutDto> listByStudentAndDay(UUID studentId, LocalDate day) {
         var from = day.atStartOfDay();
         var to = day.plusDays(1)
                 .atStartOfDay();
@@ -161,7 +162,7 @@ public class CheckOutService {
                                     .substring(0, 5))
                             .orElse(null);
 
-                    Long selfDismissalId = dismissalOpt.map(SelfDismissal::getId)
+                    UUID selfDismissalId = dismissalOpt.map(SelfDismissal::getId)
                             .orElse(null);
 
                     boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());

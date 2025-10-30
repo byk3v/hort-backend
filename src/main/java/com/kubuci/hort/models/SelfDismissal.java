@@ -1,33 +1,30 @@
 package com.kubuci.hort.models;
 
 import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.kubuci.hort.enums.PermissionStatus;
+import com.kubuci.hort.models.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "self_dismissal")
-public class SelfDismissal {
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+public class SelfDismissal extends BaseEntity {
 
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)

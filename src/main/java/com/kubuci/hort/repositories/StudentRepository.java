@@ -1,6 +1,7 @@
 package com.kubuci.hort.repositories;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.kubuci.hort.models.Student;
 
-public interface StudentRepository extends JpaRepository<Student, Long> {
+public interface StudentRepository extends JpaRepository<Student, UUID> {
 
     @Query("""
         select s.id
@@ -19,7 +20,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
                 or lower(p.lastName)  like lower(concat('%', :name, '%')))
           and (:groupId is null or s.group.id = :groupId)
         """)
-    List<Long> findIdsByOptionalFilters(@Param("name") String name, @Param("groupId") Long groupId);
+    List<UUID> findIdsByOptionalFilters(@Param("name") String name, @Param("groupId") UUID groupId);
 
     @Query("""
         select s
@@ -28,7 +29,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
         join fetch s.group g
         where s.id in :ids
         """)
-    List<Student> findByIdIn(@Param("ids") List<Long> ids);
+    List<Student> findByIdIn(@Param("ids") List<UUID> ids);
 
     @Query("""
             select s

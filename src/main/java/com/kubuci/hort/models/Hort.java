@@ -1,26 +1,33 @@
 package com.kubuci.hort.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import java.util.UUID;
+
+import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "hort", uniqueConstraints = { @UniqueConstraint(name = "uk_hort_name", columnNames = { "name" }) })
 public class Hort {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EqualsAndHashCode.Include
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
     @Column(name = "name", nullable = false, length = 160)
     private String name;
 
+    public Hort(UUID keycloakId, String name) {
+        this.id = keycloakId;
+        this.name = name;
+    }
+
+    protected Hort() {} // JPA
+
+    // to use in service-> var hort = new Hort(kcGroupId, "Hort Demo Leipzig");
 }

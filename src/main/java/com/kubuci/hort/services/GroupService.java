@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +32,14 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public GroupDto getById(Long id) {
+    public GroupDto getById(UUID id) {
         HortGroup g = groupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found: " + id));
         return new GroupDto(g.getId(), g.getName());
     }
 
     @Transactional
-    public Long save(GroupSaveRequest req) {
+    public UUID save(GroupSaveRequest req) {
         // Tutor tutor = tutorRepository.findById(req.tutorId())
         // .orElseThrow(() -> new EntityNotFoundException("Tutor not found: " +
         // req.tutorId()));
@@ -52,7 +53,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void update(Long id, GroupUpdateRequest req) {
+    public void update(UUID id, GroupUpdateRequest req) {
         HortGroup g = groupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found: " + id));
 
@@ -66,7 +67,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!groupRepository.existsById(id)) {
             throw new EntityNotFoundException("Group not found: " + id);
         }

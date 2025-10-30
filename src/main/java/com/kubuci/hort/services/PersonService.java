@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,14 +30,14 @@ public class PersonService {
     }
 
     @Transactional(readOnly = true)
-    public PersonDto getById(Long id) {
+    public PersonDto getById(UUID id) {
         Person p = personRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found: " + id));
         return toDto(p);
     }
 
     @Transactional
-    public Long save(PersonSaveRequest req) {
+    public UUID save(PersonSaveRequest req) {
         Person p = new Person();
         p.setFirstName(req.firstName());
         p.setLastName(req.lastName());
@@ -47,7 +48,7 @@ public class PersonService {
     }
 
     @Transactional
-    public void update(Long id, PersonUpdateRequest req) {
+    public void update(UUID id, PersonUpdateRequest req) {
         Person p = personRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found: " + id));
 
@@ -59,7 +60,7 @@ public class PersonService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         if (!personRepository.existsById(id)) {
             throw new EntityNotFoundException("Person not found: " + id);
         }

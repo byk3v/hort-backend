@@ -1,7 +1,10 @@
 package com.kubuci.hort.controllers;
 
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,26 +34,26 @@ public class PickupRightController {
 		return ResponseEntity.ok(service.listPermissions(status));
 	}
 
-	@PostMapping
-	public ResponseEntity<Void> create(@RequestBody @Valid NewPermissionRequest req) {
-		service.createPermission(req);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
-	}
+    @PostMapping
+    public ResponseEntity<UUID> create(@RequestBody @Valid NewPermissionRequest req) {        UUID id = service.create(req);
+        return ResponseEntity.created(URI.create("/api/pickup-rights/" + id))
+                .body(id);
+    }
 
     @PutMapping("/{id}/revoke")
-    public ResponseEntity<Void> revoke(@PathVariable Long id) {
+    public ResponseEntity<Void> revoke(@PathVariable UUID id) {
         service.revoke(id);
         return ResponseEntity.noContent()
                 .build();
     }
 
     @GetMapping("/by-student")
-    public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam Long studentId) {
+    public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam UUID studentId) {
         return ResponseEntity.ok(service.listByStudent(studentId));
     }
 
     @GetMapping("/by-collector")
-    public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam Long collectorId) {
+    public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam UUID collectorId) {
         return ResponseEntity.ok(service.listByCollector(collectorId));
     }
 }

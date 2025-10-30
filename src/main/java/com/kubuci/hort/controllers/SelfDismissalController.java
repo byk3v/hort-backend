@@ -2,6 +2,7 @@ package com.kubuci.hort.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,21 +28,21 @@ public class SelfDismissalController {
     private final SelfDismissalService service;
 
     @PostMapping
-    public ResponseEntity<Long> create(@Valid @RequestBody SelfDismissalCreateRequest req) {
-        Long id = service.create(req);
+    public ResponseEntity<UUID> create(@Valid @RequestBody SelfDismissalCreateRequest req) {
+        UUID id = service.create(req);
         return ResponseEntity.created(URI.create("/api/self-dismissals/" + id))
                 .body(id);
     }
 
     @PutMapping("/{id}/revoke")
-    public ResponseEntity<Void> revoke(@PathVariable Long id) {
+    public ResponseEntity<Void> revoke(@PathVariable UUID id) {
         service.revoke(id);
         return ResponseEntity.noContent()
                 .build();
     }
 
     @GetMapping
-    public ResponseEntity<List<SelfDismissalDto>> listByStudent(@RequestParam Long studentId) {
+    public ResponseEntity<List<SelfDismissalDto>> listByStudent(@RequestParam UUID studentId) {
         return ResponseEntity.ok(service.listByStudent(studentId));
     }
 }

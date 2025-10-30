@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record GroupSaveRequest(
     @NotBlank String name
-// @NotNull Long tutorId
+// @NotNull UUID tutorId
 ) {
 }

@@ -2,6 +2,7 @@ package com.kubuci.hort.controllers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -44,12 +45,12 @@ public class CheckOutController {
     }
 
     @GetMapping("/by-student")
-    public ResponseEntity<List<CheckOutDto>> byStudent(@RequestParam Long studentId) {
+    public ResponseEntity<List<CheckOutDto>> byStudent(@RequestParam UUID studentId) {
         return ResponseEntity.ok(service.listByStudent(studentId));
     }
 
     @GetMapping("/by-student-and-day")
-    public ResponseEntity<List<CheckOutDto>> byStudentAndDay(@RequestParam Long studentId,
+    public ResponseEntity<List<CheckOutDto>> byStudentAndDay(@RequestParam UUID studentId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
         return ResponseEntity.ok(service.listByStudentAndDay(studentId, day));
     }
