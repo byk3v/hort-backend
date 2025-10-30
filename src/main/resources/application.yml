@@ -38,5 +38,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/hort-realm
-          jwk-set-uri: http://localhost:8180/realms/hort-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8180/realms/Hort
+          jwk-set-uri: http://localhost:8180/realms/Hort/protocol/openid-connect/certs

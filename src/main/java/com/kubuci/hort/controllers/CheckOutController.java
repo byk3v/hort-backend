@@ -1,6 +1,5 @@
 package com.kubuci.hort.controllers;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kubuci.hort.dto.CheckOutCreateRequest;
 import com.kubuci.hort.dto.CheckOutDto;
+import com.kubuci.hort.dto.CheckOutSearchResponse;
 import com.kubuci.hort.services.CheckOutService;
 
 import jakarta.validation.Valid;
@@ -27,30 +27,30 @@ import lombok.RequiredArgsConstructor;
 public class CheckOutController {
     private final CheckOutService service;
 
-	@PostMapping("/confirm")
-	public ResponseEntity<Void> create(@Valid @RequestBody CheckOutCreateRequest req) {
-		service.registerCheckout(req);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
-	}
+    @PostMapping("/confirm")
+    public ResponseEntity<Void> create(@Valid @RequestBody CheckOutCreateRequest req) {
+        service.registerCheckout(req);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .build();
+    }
 
-	@GetMapping("/search")
-	public ResponseEntity<CheckOutSearchResponse> search(
-		@RequestParam("q") String q
-	) {
-		if (q == null || q.trim().length() < 2) {
-			return ResponseEntity.ok(new CheckOutSearchResponse(List.of()));
-		}
-		return ResponseEntity.ok(service.search(q.trim()));
-	}
+    @GetMapping("/search")
+    public ResponseEntity<CheckOutSearchResponse> search(@RequestParam("q") String q) {
+        if (q == null || q.trim()
+                .length() < 2) {
+            return ResponseEntity.ok(new CheckOutSearchResponse(List.of()));
+        }
+        return ResponseEntity.ok(service.search(q.trim()));
+    }
 
-	@GetMapping("/by-student")
-	public ResponseEntity<List<CheckOutDto>> byStudent(@RequestParam Long studentId) {
-		return ResponseEntity.ok(service.listByStudent(studentId));
-	}
+    @GetMapping("/by-student")
+    public ResponseEntity<List<CheckOutDto>> byStudent(@RequestParam Long studentId) {
+        return ResponseEntity.ok(service.listByStudent(studentId));
+    }
 
-	@GetMapping("/by-student-and-day")
-	public ResponseEntity<List<CheckOutDto>> byStudentAndDay(@RequestParam Long studentId,
-		@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
-		return ResponseEntity.ok(service.listByStudentAndDay(studentId, day));
-	}
+    @GetMapping("/by-student-and-day")
+    public ResponseEntity<List<CheckOutDto>> byStudentAndDay(@RequestParam Long studentId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
+        return ResponseEntity.ok(service.listByStudentAndDay(studentId, day));
+    }
 }
