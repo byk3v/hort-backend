@@ -2,6 +2,7 @@ package com.kubuci.hort.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,26 +28,26 @@ public class PickupRightController {
     private final PickupRightService service;
 
     @PostMapping
-    public ResponseEntity<Long> create(@Valid @RequestBody PickupRightCreateRequest req) {
-        Long id = service.create(req);
+    public ResponseEntity<UUID> create(@Valid @RequestBody PickupRightCreateRequest req) {
+        UUID id = service.create(req);
         return ResponseEntity.created(URI.create("/api/pickup-rights/" + id))
                 .body(id);
     }
 
     @PutMapping("/{id}/revoke")
-    public ResponseEntity<Void> revoke(@PathVariable Long id) {
+    public ResponseEntity<Void> revoke(@PathVariable UUID id) {
         service.revoke(id);
         return ResponseEntity.noContent()
                 .build();
     }
 
     @GetMapping("/by-student")
-    public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam Long studentId) {
+    public ResponseEntity<List<PickupRightDto>> byStudent(@RequestParam UUID studentId) {
         return ResponseEntity.ok(service.listByStudent(studentId));
     }
 
     @GetMapping("/by-collector")
-    public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam Long collectorId) {
+    public ResponseEntity<List<PickupRightDto>> byCollector(@RequestParam UUID collectorId) {
         return ResponseEntity.ok(service.listByCollector(collectorId));
     }
 }

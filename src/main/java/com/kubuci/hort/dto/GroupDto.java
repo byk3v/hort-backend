@@ -1,8 +1,10 @@
 package com.kubuci.hort.dto;
 
+import java.util.UUID;
+
 public record GroupDto(
-    Long id,
+    UUID id,
     String name
-// Long tutorId
+// UUID tutorId
 ) {
 }

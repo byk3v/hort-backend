@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,14 @@ public class CollectorService {
     }
 
     @Transactional(readOnly = true)
-    public CollectorDto getById(Long id) {
+    public CollectorDto getById(UUID id) {
         Collector c = collectorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Collector not found: " + id));
         return toDto(c);
     }
 
     @Transactional
-    public Long createWithPerson(CollectorSaveWithPersonRequest req) {
+    public UUID createWithPerson(CollectorSaveWithPersonRequest req) {
         Person p = new Person();
         p.setFirstName(req.firstName());
         p.setLastName(req.lastName());
@@ -56,7 +57,7 @@ public class CollectorService {
     }
 
     @Transactional
-    public void update(Long id, CollectorSaveRequest req) {
+    public void update(UUID id, CollectorSaveRequest req) {
         Collector c = collectorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Collector not found: " + id));
 
@@ -77,7 +78,7 @@ public class CollectorService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         Collector c = collectorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Collector not found: " + id));
         collectorRepository.delete(c);

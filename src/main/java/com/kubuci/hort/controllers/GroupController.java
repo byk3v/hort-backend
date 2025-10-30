@@ -2,6 +2,7 @@ package com.kubuci.hort.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,21 +37,21 @@ public class GroupController {
 
     // groupById
     @GetMapping("/{id}")
-    public ResponseEntity<GroupDto> getById(@PathVariable Long id) {
+    public ResponseEntity<GroupDto> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(groupService.getById(id));
     }
 
     // saveGroup (create)
     @PostMapping
-    public ResponseEntity<Long> save(@Valid @RequestBody GroupSaveRequest req) {
-        Long id = groupService.save(req);
+    public ResponseEntity<UUID> save(@Valid @RequestBody GroupSaveRequest req) {
+        UUID id = groupService.save(req);
         return ResponseEntity.created(URI.create("/api/groups/" + id))
                 .body(id);
     }
 
     // update
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody GroupUpdateRequest req) {
+    public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody GroupUpdateRequest req) {
         groupService.update(id, req);
         return ResponseEntity.noContent()
                 .build();
@@ -58,7 +59,7 @@ public class GroupController {
 
     // delete
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         groupService.delete(id);
         return ResponseEntity.noContent()
                 .build();

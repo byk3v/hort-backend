@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class PickupRightService {
     private final CollectorRepository collectorRepo;
 
     @Transactional
-    public Long create(PickupRightCreateRequest req) {
+    public UUID create(PickupRightCreateRequest req) {
         var student = studentRepo.findById(req.studentId())
                 .orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
         var collector = collectorRepo.findById(req.collectorId())
@@ -42,7 +43,7 @@ public class PickupRightService {
     }
 
     @Transactional
-    public void revoke(Long id) {
+    public void revoke(UUID id) {
         var pr = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("PickupRight not found: " + id));
         if (pr.getStatus() == PermissionStatus.REVOKED)
@@ -52,7 +53,7 @@ public class PickupRightService {
     }
 
     @Transactional(readOnly = true)
-    public List<PickupRightDto> listByStudent(Long studentId) {
+    public List<PickupRightDto> listByStudent(UUID studentId) {
         return repo.findByStudent_Id(studentId)
                 .stream()
                 .map(this::toDto)
@@ -60,7 +61,7 @@ public class PickupRightService {
     }
 
     @Transactional(readOnly = true)
-    public List<PickupRightDto> listByCollector(Long collectorId) {
+    public List<PickupRightDto> listByCollector(UUID collectorId) {
         return repo.findByCollector_Id(collectorId)
                 .stream()
                 .map(this::toDto)
