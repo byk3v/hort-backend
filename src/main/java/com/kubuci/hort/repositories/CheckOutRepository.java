@@ -20,14 +20,14 @@ public interface CheckOutRepository extends JpaRepository<CheckOut, Long> {
     List<CheckOut> findByStudentAndRange(@Param("studentId") Long studentId, @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
 
-	List<CheckOut> findByStudent_IdOrderByOccurredAtDesc(Long studentId);
+    List<CheckOut> findByStudent_IdOrderByOccurredAtDesc(Long studentId);
 
-	@Query("""
-    select count(c) > 0
-    from CheckOut c
-    where c.student.id = :studentId
-      and date(c.occurredAt) = current_date
-""")
-	boolean existsForToday(@Param("studentId") Long studentId);
+    @Query("""
+            select count(c) > 0
+            from CheckOut c
+            where c.student.id = :studentId
+              and date(c.occurredAt) = current_date
+        """)
+    boolean existsForToday(@Param("studentId") Long studentId);
 
 }

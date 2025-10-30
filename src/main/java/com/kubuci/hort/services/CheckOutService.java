@@ -31,162 +31,165 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CheckOutService {
-	private final CheckOutRepository repo;
-	private final StudentRepository studentRepo;
-	private final CollectorRepository collectorRepo;
-	private final PickupRightRepository pickupRightRepo;
-	private final SelfDismissalRepository selfDismissalRepo;
-	private final CheckOutRepository checkOutRepository;
+    private final CheckOutRepository repo;
+    private final StudentRepository studentRepo;
+    private final CollectorRepository collectorRepo;
+    private final PickupRightRepository pickupRightRepo;
+    private final SelfDismissalRepository selfDismissalRepo;
+    private final CheckOutRepository checkOutRepository;
 
-	@Transactional
-	public void registerCheckout(CheckOutCreateRequest req) {
-		var student = studentRepo.findById(req.studentId())
-			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
+    @Transactional
+    public void registerCheckout(CheckOutCreateRequest req) {
+        var student = studentRepo.findById(req.studentId())
+                .orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
-		LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
-		CheckOut abmeldung = new CheckOut();
-		abmeldung.setStudent(student);
-		abmeldung.setComment(req.comment());
-		abmeldung.setOccurredAt(now);
+        CheckOut abmeldung = new CheckOut();
+        abmeldung.setStudent(student);
+        abmeldung.setComment(req.comment());
+        abmeldung.setOccurredAt(now);
 
-		if (Boolean.TRUE.equals(req.selfDismissal())) {
-			// caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId
-			abmeldung.setCollector(null);
-			abmeldung.setPickupRight(null);
-			abmeldung.setCollectorType(CollectorType.STUDENT);
+        if (Boolean.TRUE.equals(req.selfDismissal())) {
+            // caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId
+            abmeldung.setCollector(null);
+            abmeldung.setPickupRight(null);
+            abmeldung.setCollectorType(CollectorType.STUDENT);
 
-			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
-			SelfDismissal dismissal = dismissalOpt.orElse(null);
-			abmeldung.setSelfDismissal(dismissal);
+            var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+            SelfDismissal dismissal = dismissalOpt.orElse(null);
+            abmeldung.setSelfDismissal(dismissal);
 
-		} else {
-			// caso: lo recoge un adulto autorizado
-			if (req.collectorId() == null || req.pickupRightId() == null) {
-				throw new IllegalArgumentException("collectorId and pickupRightId required for non-selfDismissal checkout");
-			}
+        }
+        else {
+            // caso: lo recoge un adulto autorizado
+            if (req.collectorId() == null || req.pickupRightId() == null) {
+                throw new IllegalArgumentException(
+                        "collectorId and pickupRightId required for non-selfDismissal checkout");
+            }
 
-			Collector collector = collectorRepo.findById(req.collectorId())
-				.orElseThrow(() -> new EntityNotFoundException("Collector not found " + req.collectorId()));
+            Collector collector = collectorRepo.findById(req.collectorId())
+                    .orElseThrow(() -> new EntityNotFoundException("Collector not found " + req.collectorId()));
 
-			PickupRight pr = pickupRightRepo.findById(req.pickupRightId())
-				.orElseThrow(() -> new EntityNotFoundException("PickupRight not found " + req.pickupRightId()));
+            PickupRight pr = pickupRightRepo.findById(req.pickupRightId())
+                    .orElseThrow(() -> new EntityNotFoundException("PickupRight not found " + req.pickupRightId()));
 
-			abmeldung.setCollector(collector);
-			abmeldung.setPickupRight(pr);
-			abmeldung.setSelfDismissal(null);
-			abmeldung.setCollectorType(collector.getCollectorType());
-		}
+            abmeldung.setCollector(collector);
+            abmeldung.setPickupRight(pr);
+            abmeldung.setSelfDismissal(null);
+            abmeldung.setCollectorType(collector.getCollectorType());
+        }
 
-		repo.save(abmeldung);
-	}
+        repo.save(abmeldung);
+    }
 
-	@Transactional(readOnly = true)
-	public List<CheckOutDto> listByStudent(Long studentId) {
-		return repo.findByStudent_IdOrderByOccurredAtDesc(studentId).stream()
-			.map(this::toDto)
-			.toList();
-	}
+    @Transactional(readOnly = true)
+    public List<CheckOutDto> listByStudent(Long studentId) {
+        return repo.findByStudent_IdOrderByOccurredAtDesc(studentId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 
-	@Transactional(readOnly = true)
-	public List<CheckOutDto> listByStudentAndDay(Long studentId, LocalDate day) {
-		var from = day.atStartOfDay();
-		var to = day.plusDays(1).atStartOfDay();
-		return repo.findByStudentAndRange(studentId, from, to).stream()
-			.map(this::toDto)
-			.toList();
-	}
+    @Transactional(readOnly = true)
+    public List<CheckOutDto> listByStudentAndDay(Long studentId, LocalDate day) {
+        var from = day.atStartOfDay();
+        var to = day.plusDays(1)
+                .atStartOfDay();
+        return repo.findByStudentAndRange(studentId, from, to)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 
-	@Transactional(readOnly = true)
-	public CheckOutSearchResponse search(String rawQuery) {
-		if (rawQuery == null) {
-			return new CheckOutSearchResponse(List.of());
-		}
+    @Transactional(readOnly = true)
+    public CheckOutSearchResponse search(String rawQuery) {
+        if (rawQuery == null) {
+            return new CheckOutSearchResponse(List.of());
+        }
 
-		String normalized = rawQuery.trim().toLowerCase();
-		if (normalized.length() < 2) {
-			return new CheckOutSearchResponse(List.of());
-		}
+        String normalized = rawQuery.trim()
+                .toLowerCase();
+        if (normalized.length() < 2) {
+            return new CheckOutSearchResponse(List.of());
+        }
 
-		LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
-		String[] parts = normalized.split("\\s+");
-		List<Student> matches;
-		if (parts.length == 1) {
-			matches = studentRepo.searchBySingleTerm(parts[0]);
-		} else {
-			String t1 = parts[0];
-			String t2 = parts[1];
-			matches = studentRepo.searchByTwoTerms(t1, t2);
-		}
+        String[] parts = normalized.split("\\s+");
+        List<Student> matches;
+        if (parts.length == 1) {
+            matches = studentRepo.searchBySingleTerm(parts[0]);
+        }
+        else {
+            String t1 = parts[0];
+            String t2 = parts[1];
+            matches = studentRepo.searchByTwoTerms(t1, t2);
+        }
 
+        List<CheckOutStudentInfo> studentsInfo = matches.stream()
+                .map(student -> {
+                    Person p = student.getPerson();
+                    String groupName = student.getGroup() != null
+                            ? student.getGroup()
+                                    .getName()
+                            : null;
 
-		List<CheckOutStudentInfo> studentsInfo = matches.stream().map(student -> {
-			Person p = student.getPerson();
-			String groupName = student.getGroup() != null ? student.getGroup().getName() : null;
+                    // 2. collectors válidos hoy
+                    List<PickupRight> todaysRights = pickupRightRepo.findActiveForStudentAt(student.getId(), now);
 
-			// 2. collectors válidos hoy
-			List<PickupRight> todaysRights = pickupRightRepo.findActiveForStudentAt(student.getId(), now);
+                    List<CheckOutCollectorInfo> allowedCollectors = todaysRights.stream()
+                            .map(right -> {
+                                Collector c = right.getCollector();
+                                Person cp = c.getPerson();
+                                return new CheckOutCollectorInfo(c.getId(), cp.getFirstName(), cp.getLastName(),
+                                        cp.getPhone(), right.isMainCollector(), right.getAllowedFromTime() != null
+                                                ? right.getAllowedFromTime()
+                                                        .toString()
+                                                        .substring(0, 5)
+                                                : null,
+                                        right.getId() // pickupRightId
+                                );
+                            })
+                            .toList();
 
-			List<CheckOutCollectorInfo> allowedCollectors = todaysRights.stream()
-				.map(right -> {
-					Collector c = right.getCollector();
-					Person cp = c.getPerson();
-					return new CheckOutCollectorInfo(
-						c.getId(),
-						cp.getFirstName(),
-						cp.getLastName(),
-						cp.getPhone(),
-						right.isMainCollector(),
-						right.getAllowedFromTime() != null
-							? right.getAllowedFromTime().toString().substring(0,5)
-							: null,
-						right.getId() // pickupRightId
-					);
-				})
-				.toList();
+                    var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
 
-			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+                    boolean canLeaveAloneToday = dismissalOpt.isPresent();
+                    String allowedToLeaveFromTime = dismissalOpt.map(SelfDismissal::getAllowedFromTime)
+                            .map(t -> t.toString()
+                                    .substring(0, 5))
+                            .orElse(null);
 
-			boolean canLeaveAloneToday = dismissalOpt.isPresent();
-			String allowedToLeaveFromTime = dismissalOpt
-				.map(SelfDismissal::getAllowedFromTime)
-				.map(t -> t.toString().substring(0,5))
-				.orElse(null);
+                    Long selfDismissalId = dismissalOpt.map(SelfDismissal::getId)
+                            .orElse(null);
 
-			Long selfDismissalId = dismissalOpt
-				.map(SelfDismissal::getId)
-				.orElse(null);
+                    boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
 
-			boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
+                    return new CheckOutStudentInfo(student.getId(), p.getFirstName(), p.getLastName(), groupName,
+                            canLeaveAloneToday, allowedToLeaveFromTime, selfDismissalId, alreadyCheckedOut,
+                            allowedCollectors);
+                })
+                .toList();
 
-			return new CheckOutStudentInfo(
-				student.getId(),
-				p.getFirstName(),
-				p.getLastName(),
-				groupName,
-				canLeaveAloneToday,
-				allowedToLeaveFromTime,
-				selfDismissalId,
-				alreadyCheckedOut,
-				allowedCollectors
-			);
-		}).toList();
+        return new CheckOutSearchResponse(studentsInfo);
+    }
 
-		return new CheckOutSearchResponse(studentsInfo);
-	}
-
-	private CheckOutDto toDto(CheckOut c) {
-		return new CheckOutDto(
-			c.getId(),
-			c.getStudent().getId(),
-			c.getCollectorType(),
-			(c.getCollector() != null ? c.getCollector().getId() : null),
-			c.getOccurredAt(),
-			(c.getPickupRight() != null ? c.getPickupRight().getId() : null),
-			(c.getSelfDismissal() != null ? c.getSelfDismissal().getId() : null),
-			c.getComment(),
-			c.getRecordedByUserId()
-		);
-	}
+    private CheckOutDto toDto(CheckOut c) {
+        return new CheckOutDto(c.getId(), c.getStudent()
+                .getId(), c.getCollectorType(),
+                (c.getCollector() != null
+                        ? c.getCollector()
+                                .getId()
+                        : null),
+                c.getOccurredAt(), (c.getPickupRight() != null
+                        ? c.getPickupRight()
+                                .getId()
+                        : null),
+                (c.getSelfDismissal() != null
+                        ? c.getSelfDismissal()
+                                .getId()
+                        : null),
+                c.getComment(), c.getRecordedByUserId());
+    }
 }
