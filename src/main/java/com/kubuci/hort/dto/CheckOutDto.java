@@ -10,7 +10,7 @@ public record CheckOutDto(
     UUID studentId,
     CollectorType collectorType,
     UUID collectorId,
-    LocalDateTime occurredAt,
+    LocalDateTime createdDate,
     UUID pickupRightId,
     UUID selfDismissalId,
     String comment,

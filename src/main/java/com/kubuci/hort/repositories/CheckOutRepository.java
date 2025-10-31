@@ -1,5 +1,6 @@
 package com.kubuci.hort.repositories;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,12 +24,15 @@ public interface CheckOutRepository extends JpaRepository<CheckOut, UUID> {
 
     List<CheckOut> findByStudent_IdOrderByOccurredAtDesc(UUID studentId);
 
-    @Query("""
-            select count(c) > 0
-            from CheckOut c
-            where c.student.id = :studentId
-              and date(c.occurredAt) = current_date
-        """)
-    boolean existsForToday(@Param("studentId") UUID studentId);
+    boolean existsByStudent_IdAndOccurredAtBetween(UUID studentId, LocalDateTime startInclusive,
+            LocalDateTime endExclusive);
+
+    default boolean existsForToday(UUID studentId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1)
+                .atStartOfDay();
+        return existsByStudent_IdAndOccurredAtBetween(studentId, start, end);
+    }
 
 }
