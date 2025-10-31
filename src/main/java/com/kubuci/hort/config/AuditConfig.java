@@ -1,6 +1,7 @@
 package com.kubuci.hort.config;
 
 import java.util.Optional;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -16,9 +17,11 @@ public class AuditConfig {
     @Bean
     AuditorAware<String> auditorAware() {
         return () -> {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Authentication auth = SecurityContextHolder.getContext()
+                    .getAuthentication();
             if (auth instanceof JwtAuthenticationToken jwt) {
-                String sub = jwt.getToken().getSubject(); // "sub"
+                String sub = jwt.getToken()
+                        .getSubject(); // "sub"
                 return Optional.ofNullable(sub);
             }
             return Optional.empty();
