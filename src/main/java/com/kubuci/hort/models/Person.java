@@ -20,10 +20,6 @@ import lombok.Setter;
 @Table(name = "person")
 public class Person extends BaseEntity {
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "hort_id", nullable = false)
-    private Hort hort;
-
     @NotBlank
     @Column(name = "first_name", nullable = false, length = 120)
     private String firstName;
@@ -37,5 +33,9 @@ public class Person extends BaseEntity {
 
     @Column(name = "phone", length = 40)
     private String phone;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "hort_id", nullable = false)
+    private Hort hort;
 
 }
