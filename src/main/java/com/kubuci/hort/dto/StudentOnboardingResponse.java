@@ -1,9 +1,10 @@
 package com.kubuci.hort.dto;
 
 import java.util.List;
+import java.util.UUID;
 
 public record StudentOnboardingResponse(
-	Long studentId,
-	List<Long> collectorIds,
-	List<Long> pickupRightIds
-) {}
+    UUID studentId,
+    List<UUID> collectorIds,
+    List<UUID> pickupRightIds) {
+}

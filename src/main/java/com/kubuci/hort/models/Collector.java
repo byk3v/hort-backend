@@ -1,56 +1,28 @@
 package com.kubuci.hort.models;
 
 import com.kubuci.hort.enums.CollectorType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.kubuci.hort.models.entity.BaseEntity;
+
+import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "collector")
-public class Collector {
+@Table(name = "collector", indexes = @Index(name = "idx_collector_hort", columnList = "hort_id"))
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+public class Collector extends BaseEntity {
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "hort_id", nullable = false, foreignKey = @ForeignKey(name = "fk_collector_hort"))
+    private Hort hort;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_collector_person"))
+    private Person person;
 
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_collector_person"))
-	private Person person;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "collector_type", nullable = false, length = 16)
-	private CollectorType collectorType;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
-	public CollectorType getCollectorType() {
-		return collectorType;
-	}
-
-	public void setCollectorType(CollectorType collectorType) {
-		this.collectorType = collectorType;
-	}
+    @Enumerated(EnumType.STRING)
+    @Column(name = "collector_type", nullable = false)
+    private CollectorType collectorType;
 }
