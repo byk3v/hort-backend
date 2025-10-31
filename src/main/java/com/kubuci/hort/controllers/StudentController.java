@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,7 @@ public class StudentController {
 
     // Lista + búsqueda por nombre y/o grupo
     // GET /api/students?name=ana&groupId=3
+    @PreAuthorize("hasRole('ASSISTANT')")
     @GetMapping
     public ResponseEntity<List<StudentDto>> list(@RequestParam(required = false) String name,
             @RequestParam(required = false) UUID groupId) {
