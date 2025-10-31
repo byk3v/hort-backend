@@ -50,6 +50,7 @@ public class CheckOutService {
         abmeldung.setStudent(student);
         abmeldung.setComment(req.comment());
         abmeldung.setOccurredAt(now);
+        //abmeldung.setRecordedByUserId(currentUserSub());//todo obtener el ID del usuario actual
 
         if (Boolean.TRUE.equals(req.selfDismissal())) {
             // caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId
