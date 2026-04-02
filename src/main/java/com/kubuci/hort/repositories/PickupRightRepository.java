@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.PickupRight;
 
@@ -46,40 +47,37 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
 
     List<PickupRight> findByCollector_Id(UUID collectorId);
 
-	@Query("""
-        select pr
-        from PickupRight pr
-        join fetch pr.collector c
-        join fetch c.person cp
-        where pr.student.id = :studentId
-          and pr.validFrom <= :now
-          and (pr.validUntil is null or pr.validUntil >= :now)
-    """)
-	List<PickupRight> findActiveForStudentAt(
-		@Param("studentId") UUID studentId,
-		@Param("now") LocalDateTime now
-	);
+    @Query("""
+            select pr
+            from PickupRight pr
+            join fetch pr.collector c
+            join fetch c.person cp
+            where pr.student.id = :studentId
+              and pr.validFrom <= :now
+              and (pr.validUntil is null or pr.validUntil >= :now)
+        """)
+    List<PickupRight> findActiveForStudentAt(@Param("studentId") UUID studentId, @Param("now") LocalDateTime now);
 
-	@Query("""
-		    select pr
-		    from PickupRight pr
-		    join fetch pr.student s
-		    join fetch s.person sp
-		    left join fetch s.group g
-		    join fetch pr.collector c
-		    join fetch c.person cp
-		    where (:status is null or pr.status = :status)
-		""")
-	List<PickupRight> findByStatusWithStudentAndCollector(@Param("status") PermissionStatus status);
+    @Query("""
+            select pr
+            from PickupRight pr
+            join fetch pr.student s
+            join fetch s.person sp
+            left join fetch s.group g
+            join fetch pr.collector c
+            join fetch c.person cp
+            where (:status is null or pr.status = :status)
+        """)
+    List<PickupRight> findByStatusWithStudentAndCollector(@Param("status") PermissionStatus status);
 
-	@Query("""
-		    select pr
-		    from PickupRight pr
-		    join fetch pr.student s
-		    join fetch s.person sp
-		    left join fetch s.group g
-		    join fetch pr.collector c
-		    join fetch c.person cp
-		""")
-	List<PickupRight> findAllWithStudentAndCollector();
+    @Query("""
+            select pr
+            from PickupRight pr
+            join fetch pr.student s
+            join fetch s.person sp
+            left join fetch s.group g
+            join fetch pr.collector c
+            join fetch c.person cp
+        """)
+    List<PickupRight> findAllWithStudentAndCollector();
 }

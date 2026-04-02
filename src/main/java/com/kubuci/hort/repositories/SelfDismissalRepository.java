@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.SelfDismissal;
 
 public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UUID> {
@@ -23,34 +24,31 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UU
 
     List<SelfDismissal> findByStudent_Id(UUID studentId);
 
-	@Query("""
-        select sd
-        from SelfDismissal sd
-        where sd.student.id = :studentId
-          and sd.validFrom <= :now
-          and (sd.validUntil is null or sd.validUntil >= :now)
-    """)
-	Optional<SelfDismissal> findActiveForStudentAt(
-		@Param("studentId") UUID studentId,
-		@Param("now") LocalDateTime now
-	);
+    @Query("""
+            select sd
+            from SelfDismissal sd
+            where sd.student.id = :studentId
+              and sd.validFrom <= :now
+              and (sd.validUntil is null or sd.validUntil >= :now)
+        """)
+    Optional<SelfDismissal> findActiveForStudentAt(@Param("studentId") UUID studentId, @Param("now") LocalDateTime now);
 
-	@Query("""
-		    select sd
-		    from SelfDismissal sd
-		    join fetch sd.student s
-		    join fetch s.person sp
-		    left join fetch s.group g
-		    where (:status is null or sd.status = :status)
-		""")
-	List<SelfDismissal> findByStatusWithStudent(@Param("status") PermissionStatus status);
+    @Query("""
+            select sd
+            from SelfDismissal sd
+            join fetch sd.student s
+            join fetch s.person sp
+            left join fetch s.group g
+            where (:status is null or sd.status = :status)
+        """)
+    List<SelfDismissal> findByStatusWithStudent(@Param("status") PermissionStatus status);
 
-	@Query("""
-		    select sd
-		    from SelfDismissal sd
-		    join fetch sd.student s
-		    join fetch s.person sp
-		    left join fetch s.group g
-		""")
-	List<SelfDismissal> findAllWithStudent();
+    @Query("""
+            select sd
+            from SelfDismissal sd
+            join fetch sd.student s
+            join fetch s.person sp
+            left join fetch s.group g
+        """)
+    List<SelfDismissal> findAllWithStudent();
 }
