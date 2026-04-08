@@ -1,58 +1,37 @@
 package com.kubuci.hort.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
+
+import com.kubuci.hort.models.entity.BaseEntity;
+
+import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "student", uniqueConstraints = {
-	@UniqueConstraint(name = "uk_student_person", columnNames = "person_id")
-})
-public class Student {
+@Table(name = "student", uniqueConstraints = @UniqueConstraint(name = "uk_student_person", columnNames = "person_id"), indexes = {
+        @Index(name = "idx_student_hort", columnList = "hort_id"),
+        @Index(name = "idx_student_group", columnList = "group_id") })
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+public class Student extends BaseEntity {
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "hort_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_hort"))
+    private Hort hort;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_person"))
+    private Person person;
 
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "person_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_person"))
-	private Person person;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
+    private HortGroup group;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
-	private Group group;
+    @Column(name = "allowed_time_to_leave")
+    private LocalDateTime allowedTimeToLeave;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Person getPerson() {
-		return person;
-	}
-
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-
-	public Group getGroup() {
-		return group;
-	}
-
-	public void setGroup(Group group) {
-		this.group = group;
-	}
-
-
+    @Column(name = "can_leave_alone", nullable = false)
+    private boolean canLeaveAlone;
 }
