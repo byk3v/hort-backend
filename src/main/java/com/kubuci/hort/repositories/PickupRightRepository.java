@@ -27,7 +27,7 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
         join fetch pr.collector c
         join fetch c.person cp
         where pr.student.id in :studentIds
-          and pr.status = 'ACTIVE'
+          and pr.status = PermissionStatus.ACTIVE
           and pr.validFrom <= :at
           and (pr.validUntil is null or pr.validUntil >= :at)
         """)
@@ -37,7 +37,7 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
     @Query("""
           select p from PickupRight p
           where p.student.id = :studentId
-            and p.status = 'ACTIVE'
+            and p.status = PermissionStatus.ACTIVE
             and p.validFrom <= :at
             and (p.validUntil is null or p.validUntil >= :at)
         """)
@@ -66,7 +66,7 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
             left join fetch s.group g
             join fetch pr.collector c
             join fetch c.person cp
-            where (:status is null or pr.status = :status)
+            where pr.status = :status
         """)
     List<PickupRight> findByStatusWithStudentAndCollector(@Param("status") PermissionStatus status);
 

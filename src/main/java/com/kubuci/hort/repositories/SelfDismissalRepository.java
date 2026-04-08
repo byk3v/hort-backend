@@ -16,7 +16,7 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UU
     @Query("""
           select s from SelfDismissal s
           where s.student.id = :studentId
-            and s.status = 'ACTIVE'
+            and s.status = PermissionStatus.ACTIVE
             and s.validFrom <= :at
             and (s.validUntil is null or s.validUntil >= :at)
         """)
@@ -39,7 +39,7 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UU
             join fetch sd.student s
             join fetch s.person sp
             left join fetch s.group g
-            where (:status is null or sd.status = :status)
+            where sd.status = :status
         """)
     List<SelfDismissal> findByStatusWithStudent(@Param("status") PermissionStatus status);
 

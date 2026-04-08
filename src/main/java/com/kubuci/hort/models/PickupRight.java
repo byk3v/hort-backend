@@ -3,6 +3,9 @@ package com.kubuci.hort.models;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.enums.PermissionType;
 import com.kubuci.hort.models.entity.BaseEntity;
@@ -32,7 +35,8 @@ public class PickupRight extends BaseEntity {
     private Collector collector;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "type", nullable = false, columnDefinition = "permission_type_enum")
     private PermissionType type;
 
     @Column(name = "valid_from", nullable = false)
@@ -45,7 +49,8 @@ public class PickupRight extends BaseEntity {
     private LocalTime allowedFromTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false, columnDefinition = "permission_status_enum")
     private PermissionStatus status;
 
     @Column(name = "main_collector", nullable = false)
