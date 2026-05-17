@@ -1,9 +1,11 @@
 package com.kubuci.hort.dto;
 
+import java.util.UUID;
+
 public record PersonDto(
-	Long id,
-	String firstName,
-	String lastName,
-	String address,
-	String phone
-) {}
+    UUID id,
+    String firstName,
+    String lastName,
+    String address,
+    String phone) {
+}
