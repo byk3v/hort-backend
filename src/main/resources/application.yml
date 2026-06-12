@@ -1,0 +1,49 @@
+server:
+  port: 4000
+  shutdown: graceful
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5542/hortdb
+    username: hort
+    password: hort
+
+  flyway:
+    enabled: true
+    create-schemas: true
+    schemas: hort
+    default-schema: hort
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: hort
+        jdbc:
+          time_zone: UTC
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/Hort
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  task:
+    execution:
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+    scheduling:
+      shutdown:
+        await-termination: true
+
+logging:
+  level:
+    org.springframework.security: TRACE
