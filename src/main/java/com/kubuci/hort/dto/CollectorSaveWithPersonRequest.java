@@ -4,10 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 
 public record CollectorSaveWithPersonRequest(
 	@NotBlank String firstName,
-	@NotBlank  String lastName,
+	@NotBlank String lastName,
 	String address,
 	String phone,
-	@NotBlank String collectorType
-) {
+	@NotBlank String collectorType) {
 
 }

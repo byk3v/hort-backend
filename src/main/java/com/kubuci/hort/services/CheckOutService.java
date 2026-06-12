@@ -3,8 +3,11 @@ package com.kubuci.hort.services;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.kubuci.hort.dto.CheckOutCollectorInfo;
 import com.kubuci.hort.dto.CheckOutCreateRequest;
 import com.kubuci.hort.dto.CheckOutDto;
@@ -22,6 +25,7 @@ import com.kubuci.hort.repositories.CollectorRepository;
 import com.kubuci.hort.repositories.PickupRightRepository;
 import com.kubuci.hort.repositories.SelfDismissalRepository;
 import com.kubuci.hort.repositories.StudentRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +50,7 @@ public class CheckOutService {
 		abmeldung.setStudent(student);
 		abmeldung.setComment(req.comment());
 		abmeldung.setOccurredAt(now);
+		// abmeldung.setRecordedByUserId(currentUserSub());//todo obtener el ID del usuario actual
 
 		if (Boolean.TRUE.equals(req.selfDismissal())) {
 			// caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId
@@ -57,10 +62,12 @@ public class CheckOutService {
 			SelfDismissal dismissal = dismissalOpt.orElse(null);
 			abmeldung.setSelfDismissal(dismissal);
 
-		} else {
+		}
+		else {
 			// caso: lo recoge un adulto autorizado
 			if (req.collectorId() == null || req.pickupRightId() == null) {
-				throw new IllegalArgumentException("collectorId and pickupRightId required for non-selfDismissal checkout");
+				throw new IllegalArgumentException(
+					"collectorId and pickupRightId required for non-selfDismissal checkout");
 			}
 
 			Collector collector = collectorRepo.findById(req.collectorId())
@@ -79,17 +86,20 @@ public class CheckOutService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CheckOutDto> listByStudent(Long studentId) {
-		return repo.findByStudent_IdOrderByOccurredAtDesc(studentId).stream()
+	public List<CheckOutDto> listByStudent(UUID studentId) {
+		return repo.findByStudent_IdOrderByOccurredAtDesc(studentId)
+			.stream()
 			.map(this::toDto)
 			.toList();
 	}
 
 	@Transactional(readOnly = true)
-	public List<CheckOutDto> listByStudentAndDay(Long studentId, LocalDate day) {
+	public List<CheckOutDto> listByStudentAndDay(UUID studentId, LocalDate day) {
 		var from = day.atStartOfDay();
-		var to = day.plusDays(1).atStartOfDay();
-		return repo.findByStudentAndRange(studentId, from, to).stream()
+		var to = day.plusDays(1)
+			.atStartOfDay();
+		return repo.findByStudentAndRange(studentId, from, to)
+			.stream()
 			.map(this::toDto)
 			.toList();
 	}
@@ -100,7 +110,8 @@ public class CheckOutService {
 			return new CheckOutSearchResponse(List.of());
 		}
 
-		String normalized = rawQuery.trim().toLowerCase();
+		String normalized = rawQuery.trim()
+			.toLowerCase();
 		if (normalized.length() < 2) {
 			return new CheckOutSearchResponse(List.of());
 		}
@@ -111,79 +122,76 @@ public class CheckOutService {
 		List<Student> matches;
 		if (parts.length == 1) {
 			matches = studentRepo.searchBySingleTerm(parts[0]);
-		} else {
+		}
+		else {
 			String t1 = parts[0];
 			String t2 = parts[1];
 			matches = studentRepo.searchByTwoTerms(t1, t2);
 		}
 
+		List<CheckOutStudentInfo> studentsInfo = matches.stream()
+			.map(student -> {
+				Person p = student.getPerson();
+				String groupName = student.getGroup() != null
+					? student.getGroup()
+					.getName()
+					: null;
 
-		List<CheckOutStudentInfo> studentsInfo = matches.stream().map(student -> {
-			Person p = student.getPerson();
-			String groupName = student.getGroup() != null ? student.getGroup().getName() : null;
+				// 2. collectors válidos hoy
+				List<PickupRight> todaysRights = pickupRightRepo.findActiveForStudentAt(student.getId(), now);
 
-			// 2. collectors válidos hoy
-			List<PickupRight> todaysRights = pickupRightRepo.findActiveForStudentAt(student.getId(), now);
-
-			List<CheckOutCollectorInfo> allowedCollectors = todaysRights.stream()
-				.map(right -> {
-					Collector c = right.getCollector();
-					Person cp = c.getPerson();
-					return new CheckOutCollectorInfo(
-						c.getId(),
-						cp.getFirstName(),
-						cp.getLastName(),
-						cp.getPhone(),
-						right.isMainCollector(),
-						right.getAllowedFromTime() != null
-							? right.getAllowedFromTime().toString().substring(0,5)
+				List<CheckOutCollectorInfo> allowedCollectors = todaysRights.stream()
+					.map(right -> {
+						Collector c = right.getCollector();
+						Person cp = c.getPerson();
+						return new CheckOutCollectorInfo(c.getId(), cp.getFirstName(), cp.getLastName(),
+							cp.getPhone(), right.isMainCollector(), right.getAllowedFromTime() != null
+							? right.getAllowedFromTime()
+							.toString()
+							.substring(0, 5)
 							: null,
-						right.getId() // pickupRightId
-					);
-				})
-				.toList();
+							right.getId() // pickupRightId
+						);
+					})
+					.toList();
 
-			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+				var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
 
-			boolean canLeaveAloneToday = dismissalOpt.isPresent();
-			String allowedToLeaveFromTime = dismissalOpt
-				.map(SelfDismissal::getAllowedFromTime)
-				.map(t -> t.toString().substring(0,5))
-				.orElse(null);
+				boolean canLeaveAloneToday = dismissalOpt.isPresent();
+				String allowedToLeaveFromTime = dismissalOpt.map(SelfDismissal::getAllowedFromTime)
+					.map(t -> t.toString()
+						.substring(0, 5))
+					.orElse(null);
 
-			Long selfDismissalId = dismissalOpt
-				.map(SelfDismissal::getId)
-				.orElse(null);
+				UUID selfDismissalId = dismissalOpt.map(SelfDismissal::getId)
+					.orElse(null);
 
-			boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
+				boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
 
-			return new CheckOutStudentInfo(
-				student.getId(),
-				p.getFirstName(),
-				p.getLastName(),
-				groupName,
-				canLeaveAloneToday,
-				allowedToLeaveFromTime,
-				selfDismissalId,
-				alreadyCheckedOut,
-				allowedCollectors
-			);
-		}).toList();
+				return new CheckOutStudentInfo(student.getId(), p.getFirstName(), p.getLastName(), groupName,
+					canLeaveAloneToday, allowedToLeaveFromTime, selfDismissalId, alreadyCheckedOut,
+					allowedCollectors);
+			})
+			.toList();
 
 		return new CheckOutSearchResponse(studentsInfo);
 	}
 
 	private CheckOutDto toDto(CheckOut c) {
-		return new CheckOutDto(
-			c.getId(),
-			c.getStudent().getId(),
-			c.getCollectorType(),
-			(c.getCollector() != null ? c.getCollector().getId() : null),
-			c.getOccurredAt(),
-			(c.getPickupRight() != null ? c.getPickupRight().getId() : null),
-			(c.getSelfDismissal() != null ? c.getSelfDismissal().getId() : null),
-			c.getComment(),
-			c.getRecordedByUserId()
-		);
+		return new CheckOutDto(c.getId(), c.getStudent()
+			.getId(), c.getCollectorType(),
+			(c.getCollector() != null
+				? c.getCollector()
+				.getId()
+				: null),
+			c.getOccurredAt(), (c.getPickupRight() != null
+			? c.getPickupRight()
+			.getId()
+			: null),
+			(c.getSelfDismissal() != null
+				? c.getSelfDismissal()
+				.getId()
+				: null),
+			c.getComment(), c.getRecordedByUserId());
 	}
 }
