@@ -13,6 +13,7 @@ import com.kubuci.hort.models.PickupRight;
 import com.kubuci.hort.repositories.CollectorRepository;
 import com.kubuci.hort.repositories.PickupRightRepository;
 import com.kubuci.hort.repositories.StudentRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +24,18 @@ public class PickupRightService {
 	private final PickupRightRepository repo;
 	private final StudentRepository studentRepo;
 	private final CollectorRepository collectorRepo;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional
 	public UUID create(PickupRightCreateRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		var student = studentRepo.findById(req.studentId())
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 		var collector = collectorRepo.findById(req.collectorId())
 			.orElseThrow(() -> new EntityNotFoundException("Collector not found: " + req.collectorId()));
 
 		var pr = new PickupRight();
+		pr.setHort(hort);
 		pr.setStudent(student);
 		pr.setCollector(collector);
 		pr.setType(req.type());

@@ -12,6 +12,7 @@ import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.SelfDismissal;
 import com.kubuci.hort.repositories.SelfDismissalRepository;
 import com.kubuci.hort.repositories.StudentRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +22,16 @@ import lombok.RequiredArgsConstructor;
 public class SelfDismissalService {
 	private final SelfDismissalRepository repo;
 	private final StudentRepository studentRepo;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional
 	public UUID create(SelfDismissalCreateRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		var student = studentRepo.findById(req.studentId())
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
 		var s = new SelfDismissal();
+		s.setHort(hort);
 		s.setStudent(student);
 		s.setValidFrom(req.validFrom());
 		s.setValidUntil(req.validUntil());

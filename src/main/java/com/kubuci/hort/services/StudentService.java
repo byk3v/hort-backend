@@ -24,6 +24,7 @@ import com.kubuci.hort.repositories.GroupRepository;
 import com.kubuci.hort.repositories.PersonRepository;
 import com.kubuci.hort.repositories.PickupRightRepository;
 import com.kubuci.hort.repositories.StudentRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class StudentService {
 	private final PersonRepository personRepository;
 	private final GroupRepository groupRepository;
 	private final CollectorRepository collectorRepository;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional(readOnly = true)
 	public List<StudentDto> list(String name, UUID groupId) {
@@ -96,7 +98,9 @@ public class StudentService {
 
 	@Transactional
 	public UUID save(StudentSaveRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		Person p = new Person();
+		p.setHort(hort);
 		p.setFirstName(req.firstName());
 		p.setLastName(req.lastName());
 		p.setAddress(req.address());
@@ -107,6 +111,7 @@ public class StudentService {
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();
+		student.setHort(hort);
 		student.setPerson(p);
 		student.setGroup(group);
 
@@ -116,7 +121,9 @@ public class StudentService {
 
 	@Transactional
 	public StudentOnboardingResponse onboardNewStudent(StudentOnboardingRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		Person studentData = new Person();
+		studentData.setHort(hort);
 		studentData.setFirstName(req.student()
 			.firstName());
 		studentData.setLastName(req.student()
@@ -129,6 +136,7 @@ public class StudentService {
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + req.groupId()));
 
 		Student student = new Student();
+		student.setHort(hort);
 		student.setPerson(studentData);
 		student.setGroup(group);
 		studentRepository.save(student);
@@ -143,14 +151,16 @@ public class StudentService {
 			Collector collector = collectorRepository.findMatch(cReq.firstName(), cReq.lastName(), cReq.phone())
 				.orElseGet(() -> {
 					// no existe -> creamos Person y Collector
-					Person collectorPerson = new Person();
+						Person collectorPerson = new Person();
+						collectorPerson.setHort(hort);
 					collectorPerson.setFirstName(cReq.firstName());
 					collectorPerson.setLastName(cReq.lastName());
 					collectorPerson.setAddress(cReq.address());
 					collectorPerson.setPhone(cReq.phone());
 					personRepository.save(collectorPerson);
 
-					Collector newCollector = new Collector();
+						Collector newCollector = new Collector();
+						newCollector.setHort(hort);
 					newCollector.setCollectorType(cReq.type());
 					newCollector.setPerson(collectorPerson);
 
@@ -160,6 +170,7 @@ public class StudentService {
 			collectorEntities.add(collector);
 
 			PickupRight right = new PickupRight();
+			right.setHort(hort);
 			right.setStudent(student);
 			right.setCollector(collector);
 			right.setType(cReq.permissionType());

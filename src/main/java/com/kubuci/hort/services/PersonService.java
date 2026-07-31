@@ -11,6 +11,7 @@ import com.kubuci.hort.dto.PersonSaveRequest;
 import com.kubuci.hort.dto.PersonUpdateRequest;
 import com.kubuci.hort.models.Person;
 import com.kubuci.hort.repositories.PersonRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class PersonService {
 
 	private final PersonRepository personRepository;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional(readOnly = true)
 	public List<PersonDto> list() {
@@ -38,7 +40,9 @@ public class PersonService {
 
 	@Transactional
 	public UUID save(PersonSaveRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		Person p = new Person();
+		p.setHort(hort);
 		p.setFirstName(req.firstName());
 		p.setLastName(req.lastName());
 		p.setAddress(req.address());

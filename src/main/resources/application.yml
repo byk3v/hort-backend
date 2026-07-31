@@ -5,11 +5,13 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5542/hortdb
-    username: hort
-    password: hort
+    username: ${HORT_DB_APP_USER:hort}
+    password: ${HORT_DB_APP_PASSWORD:hort}
 
   flyway:
     enabled: true
+    user: ${HORT_DB_MIGRATION_USER:hort}
+    password: ${HORT_DB_MIGRATION_PASSWORD:hort}
     create-schemas: true
     schemas: hort
     default-schema: hort

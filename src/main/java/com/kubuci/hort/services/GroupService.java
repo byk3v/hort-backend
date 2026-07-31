@@ -12,6 +12,7 @@ import com.kubuci.hort.dto.GroupUpdateRequest;
 import com.kubuci.hort.models.HortGroup;
 import com.kubuci.hort.repositories.GroupRepository;
 import com.kubuci.hort.repositories.TutorRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class GroupService {
 
 	private final GroupRepository groupRepository;
 	private final TutorRepository tutorRepository;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional(readOnly = true)
 	public List<GroupDto> list() {
@@ -40,11 +42,13 @@ public class GroupService {
 
 	@Transactional
 	public UUID save(GroupSaveRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		// Tutor tutor = tutorRepository.findById(req.tutorId())
 		// .orElseThrow(() -> new EntityNotFoundException("Tutor not found: " +
 		// req.tutorId()));
 
 		HortGroup g = new HortGroup();
+		g.setHort(hort);
 		g.setName(req.name());
 		// g.setTutor(tutor);
 

@@ -18,6 +18,10 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class SelfDismissal extends BaseEntity {
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "hort_id", nullable = false, foreignKey = @ForeignKey(name = "fk_self_dismissal_hort"))
+	private Hort hort;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id", nullable = false, foreignKey = @ForeignKey(name = "fk_self_dismissal_student"))
 	private Student student;
 

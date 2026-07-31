@@ -25,6 +25,8 @@ import com.kubuci.hort.repositories.CollectorRepository;
 import com.kubuci.hort.repositories.PickupRightRepository;
 import com.kubuci.hort.repositories.SelfDismissalRepository;
 import com.kubuci.hort.repositories.StudentRepository;
+import com.kubuci.hort.security.TenantHortResolver;
+import com.kubuci.hort.security.TenantContext;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -38,19 +40,23 @@ public class CheckOutService {
 	private final PickupRightRepository pickupRightRepo;
 	private final SelfDismissalRepository selfDismissalRepo;
 	private final CheckOutRepository checkOutRepository;
+	private final TenantHortResolver tenantHortResolver;
+	private final TenantContext tenantContext;
 
 	@Transactional
 	public void registerCheckout(CheckOutCreateRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		var student = studentRepo.findById(req.studentId())
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
 		LocalDateTime now = LocalDateTime.now();
 
 		CheckOut abmeldung = new CheckOut();
+		abmeldung.setHort(hort);
 		abmeldung.setStudent(student);
 		abmeldung.setComment(req.comment());
 		abmeldung.setOccurredAt(now);
-		// abmeldung.setRecordedByUserId(currentUserSub());//todo obtener el ID del usuario actual
+		abmeldung.setRecordedByUserId(tenantContext.requireUserId());
 
 		if (Boolean.TRUE.equals(req.selfDismissal())) {
 			// caso: el niño se va solo, aquí no tenemos collectorId ni pickupRightId

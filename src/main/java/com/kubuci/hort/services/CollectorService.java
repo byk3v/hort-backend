@@ -15,6 +15,7 @@ import com.kubuci.hort.models.Collector;
 import com.kubuci.hort.models.Person;
 import com.kubuci.hort.repositories.CollectorRepository;
 import com.kubuci.hort.repositories.PersonRepository;
+import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class CollectorService {
 	private final CollectorRepository collectorRepository;
 	private final PersonRepository personRepository;
+	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional(readOnly = true)
 	public List<CollectorDto> list() {
@@ -42,7 +44,9 @@ public class CollectorService {
 
 	@Transactional
 	public UUID createWithPerson(CollectorSaveWithPersonRequest req) {
+		var hort = tenantHortResolver.requireCurrentHort();
 		Person p = new Person();
+		p.setHort(hort);
 		p.setFirstName(req.firstName());
 		p.setLastName(req.lastName());
 		p.setAddress(req.address());
@@ -50,6 +54,7 @@ public class CollectorService {
 		personRepository.save(p);
 
 		Collector c = new Collector();
+		c.setHort(hort);
 		c.setPerson(p);
 		c.setCollectorType(CollectorType.valueOf(req.collectorType()));
 		return collectorRepository.save(c)
