@@ -57,6 +57,15 @@ class TenantContextTest {
 			.hasMessage("Authenticated JWT is required");
 	}
 
+	@Test
+	void rejectsMissingSubject() {
+		authenticate(Map.of("hort_id", "11111111-1111-1111-1111-111111111111"));
+
+		assertThatThrownBy(tenantContext::requireUserId)
+			.isInstanceOf(AccessDeniedException.class)
+			.hasMessage("Missing required sub claim");
+	}
+
 	private void authenticate(Map<String, Object> claims) {
 		var jwt = new Jwt("token", Instant.now(), Instant.now().plusSeconds(60), Map.of("alg", "none"), claims);
 		SecurityContextHolder.getContext()
