@@ -51,6 +51,7 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			.with(user(HORT_1, "ASSISTANT")))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.items", hasSize(2)))
+			.andExpect(jsonPath("$.items[0].canLeaveAlone").doesNotExist())
 			.andExpect(jsonPath("$.page").value(0))
 			.andExpect(jsonPath("$.size").value(2))
 			.andExpect(jsonPath("$.totalElements").value(9))
@@ -119,6 +120,7 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			.andExpect(header().string("Location", org.hamcrest.Matchers.matchesPattern("/api/v1/students/.+")))
 			.andExpect(jsonPath("$.id").isNotEmpty())
 			.andExpect(jsonPath("$.group.id").value(HORT_1_GROUP))
+			.andExpect(jsonPath("$.canLeaveAlone").doesNotExist())
 			.andExpect(jsonPath("$.collectors", hasSize(2)))
 			.andExpect(jsonPath("$.collectors[?(@.mainCollector == true)]", hasSize(1)))
 			.andReturn()
@@ -181,7 +183,6 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			{
 			  "student":{"firstName":"%s","lastName":"Test","address":"Test address"},
 			  "groupId":"%s",
-			  "canLeaveAlone":false,
 			  "collectors":[{
 			    "source":"EXISTING",
 			    "existingCollectorId":"%s",
@@ -197,7 +198,6 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			{
 			  "student":{"firstName":"%s","lastName":"Test","address":"Test address","phone":"100"},
 			  "groupId":"%s",
-			  "canLeaveAlone":false,
 			  "collectors":[
 			    {"source":"NEW","newCollector":{"firstName":"New","lastName":"Collector","phone":"200"},"permissionType":"PERMANENT","mainCollector":false},
 			    {"source":"EXISTING","existingCollectorId":"%s","permissionType":"PERMANENT","mainCollector":true}
@@ -211,7 +211,6 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			{
 			  "student":{"firstName":"Rollback Student","lastName":"Test"},
 			  "groupId":"%s",
-			  "canLeaveAlone":false,
 			  "collectors":[
 			    {"source":"NEW","newCollector":{"firstName":"Rolled","lastName":"Back"},"permissionType":"PERMANENT","mainCollector":true},
 			    {"source":"EXISTING","existingCollectorId":"%s","permissionType":"PERMANENT","mainCollector":false}

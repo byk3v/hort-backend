@@ -1,6 +1,6 @@
 package com.kubuci.hort.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.kubuci.hort.enums.CollectorType;
@@ -10,7 +10,7 @@ public record CheckOutDto(
 	UUID studentId,
 	CollectorType collectorType,
 	UUID collectorId,
-	LocalDateTime createdDate,
+	OffsetDateTime createdDate,
 	UUID pickupRightId,
 	UUID selfDismissalId,
 	String comment,

@@ -154,8 +154,8 @@ class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 		assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
 			setTenant(HORT_1);
 			jdbcTemplate.update("""
-				insert into hort.student (id, hort_id, person_id, group_id, can_leave_alone)
-				values (?, ?, ?, ?, false)
+				insert into hort.student (id, hort_id, person_id, group_id)
+				values (?, ?, ?, ?)
 				""", UUID.randomUUID(), HORT_1, HORT_1_PERSON, HORT_2_GROUP);
 		}))
 			.isInstanceOf(DataIntegrityViolationException.class);

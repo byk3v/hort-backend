@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotNull;
 public record StudentOnboardingV1Request(
 	@NotNull @Valid NewStudentRequest student,
 	@NotNull UUID groupId,
-	boolean canLeaveAlone,
 	@NotEmpty @Valid List<StudentCollectorOnboardingRequest> collectors) {
 
 	@JsonIgnore

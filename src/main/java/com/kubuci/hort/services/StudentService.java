@@ -171,7 +171,6 @@ public class StudentService {
 		student.setHort(hort);
 		student.setPerson(studentPerson);
 		student.setGroup(group);
-		student.setCanLeaveAlone(req.canLeaveAlone());
 		studentRepository.save(student);
 
 		Set<UUID> existingCollectorIds = new HashSet<>();
@@ -273,9 +272,9 @@ public class StudentService {
 				}
 				Person person = student.getPerson();
 				HortGroup group = student.getGroup();
-				return new StudentV1Dto(student.getId(), person.getFirstName(), person.getLastName(),
-					person.getAddress(), person.getPhone(), new StudentGroupV1Dto(group.getId(), group.getName()),
-					student.isCanLeaveAlone(), collectors.getOrDefault(id, List.of()));
+					return new StudentV1Dto(student.getId(), person.getFirstName(), person.getLastName(),
+						person.getAddress(), person.getPhone(), new StudentGroupV1Dto(group.getId(), group.getName()),
+						collectors.getOrDefault(id, List.of()));
 			})
 			.toList();
 	}

@@ -10,6 +10,5 @@ public record StudentV1Dto(
 	String address,
 	String phone,
 	StudentGroupV1Dto group,
-	boolean canLeaveAlone,
 	List<StudentCollectorV1Dto> collectors) {
 }

@@ -1,7 +1,5 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDateTime;
-
 import com.kubuci.hort.models.entity.BaseEntity;
 
 import jakarta.persistence.*;
@@ -29,9 +27,4 @@ public class Student extends BaseEntity {
 	@JoinColumn(name = "group_id", nullable = false, foreignKey = @ForeignKey(name = "fk_student_group"))
 	private HortGroup group;
 
-	@Column(name = "allowed_time_to_leave")
-	private LocalDateTime allowedTimeToLeave;
-
-	@Column(name = "can_leave_alone", nullable = false)
-	private boolean canLeaveAlone;
 }
