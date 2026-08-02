@@ -11,7 +11,6 @@ import com.kubuci.hort.dto.GroupSaveRequest;
 import com.kubuci.hort.dto.GroupUpdateRequest;
 import com.kubuci.hort.models.HortGroup;
 import com.kubuci.hort.repositories.GroupRepository;
-import com.kubuci.hort.repositories.TutorRepository;
 import com.kubuci.hort.security.TenantHortResolver;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class GroupService {
 
 	private final GroupRepository groupRepository;
-	private final TutorRepository tutorRepository;
 	private final TenantHortResolver tenantHortResolver;
 
 	@Transactional(readOnly = true)
@@ -54,6 +52,12 @@ public class GroupService {
 
 		return groupRepository.save(g)
 			.getId();
+	}
+
+	@Transactional
+	public GroupDto create(GroupSaveRequest req) {
+		UUID id = save(req);
+		return getById(id);
 	}
 
 	@Transactional

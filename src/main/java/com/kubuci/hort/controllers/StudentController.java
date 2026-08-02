@@ -32,12 +32,14 @@ public class StudentController {
 	// GET /api/students?name=ana&groupId=3
 	//@PreAuthorize("hasRole('isAuthenticated')")
 	@GetMapping
+	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<List<StudentDto>> list(@RequestParam(required = false) String name,
 		@RequestParam(required = false) UUID groupId) {
 		return ResponseEntity.ok(studentService.list(name, groupId));
 	}
 
 	@PostMapping
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<StudentOnboardingResponse> save(@Valid @RequestBody StudentOnboardingRequest req) {
 		StudentOnboardingResponse resp = studentService.onboardNewStudent(req);
 		return ResponseEntity.status(HttpStatus.CREATED)

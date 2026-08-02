@@ -6,6 +6,9 @@ import java.time.LocalTime;
 import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.entity.BaseEntity;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -35,6 +38,7 @@ public class SelfDismissal extends BaseEntity {
 	private LocalTime allowedFromTime;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status", nullable = false)
 	private PermissionStatus status;
 }

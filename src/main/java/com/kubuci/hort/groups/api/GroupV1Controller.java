@@ -1,4 +1,4 @@
-package com.kubuci.hort.controllers;
+package com.kubuci.hort.groups.api;
 
 import java.net.URI;
 import java.util.List;
@@ -24,45 +24,40 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
-public class GroupController {
+public class GroupV1Controller {
 
 	private final GroupService groupService;
 
-	// lista
 	@GetMapping
 	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<List<GroupDto>> list() {
 		return ResponseEntity.ok(groupService.list());
 	}
 
-	// groupById
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<GroupDto> getById(@PathVariable UUID id) {
 		return ResponseEntity.ok(groupService.getById(id));
 	}
 
-	// saveGroup (create)
 	@PostMapping
 	@PreAuthorize("hasRole('HORT_ADMIN')")
-	public ResponseEntity<UUID> save(@Valid @RequestBody GroupSaveRequest req) {
-		UUID id = groupService.save(req);
-		return ResponseEntity.created(URI.create("/api/groups/" + id))
-			.body(id);
+	public ResponseEntity<GroupDto> create(@Valid @RequestBody GroupSaveRequest request) {
+		GroupDto created = groupService.create(request);
+		return ResponseEntity.created(URI.create("/api/v1/groups/" + created.id()))
+			.body(created);
 	}
 
-	// update
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('HORT_ADMIN')")
-	public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody GroupUpdateRequest req) {
-		groupService.update(id, req);
+	public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody GroupUpdateRequest request) {
+		groupService.update(id, request);
 		return ResponseEntity.noContent()
 			.build();
 	}
 
-	// delete
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable UUID id) {
