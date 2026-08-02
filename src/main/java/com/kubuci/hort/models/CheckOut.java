@@ -1,6 +1,6 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import com.kubuci.hort.enums.CollectorType;
 import com.kubuci.hort.models.entity.BaseEntity;
@@ -47,7 +47,7 @@ public class CheckOut extends BaseEntity {
 	private SelfDismissal selfDismissal; // null si lo recoge adulto
 
 	@Column(name = "occurred_at", nullable = false)
-	private LocalDateTime occurredAt;
+	private OffsetDateTime occurredAt;
 
 	@Column(name = "comment", length = 500)
 	private String comment;

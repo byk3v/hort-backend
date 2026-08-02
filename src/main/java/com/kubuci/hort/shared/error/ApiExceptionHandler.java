@@ -89,6 +89,11 @@ public class ApiExceptionHandler {
 			"The operation conflicts with existing data.", request);
 	}
 
+	@ExceptionHandler(ApiConflictException.class)
+	ResponseEntity<ProblemDetail> businessConflict(ApiConflictException exception, HttpServletRequest request) {
+		return response(HttpStatus.CONFLICT, exception.code(), exception.getMessage(), request);
+	}
+
 	@ExceptionHandler(AccessDeniedException.class)
 	ResponseEntity<ProblemDetail> forbidden(AccessDeniedException exception, HttpServletRequest request) {
 		return response(HttpStatus.FORBIDDEN, "access_denied", "Access is denied.", request);

@@ -1,7 +1,6 @@
 package com.kubuci.hort.services;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -51,7 +50,7 @@ public class CheckOutService {
 		var student = studentRepo.findById(req.studentId())
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
-		LocalDateTime now = LocalDateTime.now();
+		OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 		OffsetDateTime authorizationNow = OffsetDateTime.now(ZoneOffset.UTC);
 
 		CheckOut abmeldung = new CheckOut();
@@ -104,9 +103,8 @@ public class CheckOutService {
 
 	@Transactional(readOnly = true)
 	public List<CheckOutDto> listByStudentAndDay(UUID studentId, LocalDate day) {
-		var from = day.atStartOfDay();
-		var to = day.plusDays(1)
-			.atStartOfDay();
+		var from = day.atStartOfDay(java.time.ZoneId.of("Europe/Berlin")).toOffsetDateTime();
+		var to = day.plusDays(1).atStartOfDay(java.time.ZoneId.of("Europe/Berlin")).toOffsetDateTime();
 		return repo.findByStudentAndRange(studentId, from, to)
 			.stream()
 			.map(this::toDto)
@@ -175,7 +173,11 @@ public class CheckOutService {
 				UUID selfDismissalId = dismissalOpt.map(SelfDismissal::getId)
 					.orElse(null);
 
-				boolean alreadyCheckedOut = checkOutRepository.existsForToday(student.getId());
+				var today = LocalDate.now(java.time.ZoneId.of("Europe/Berlin"));
+				var start = today.atStartOfDay(java.time.ZoneId.of("Europe/Berlin")).toOffsetDateTime();
+				var end = today.plusDays(1).atStartOfDay(java.time.ZoneId.of("Europe/Berlin")).toOffsetDateTime();
+				boolean alreadyCheckedOut = checkOutRepository
+					.existsByStudent_IdAndOccurredAtBetween(student.getId(), start, end);
 
 				return new CheckOutStudentInfo(student.getId(), p.getFirstName(), p.getLastName(), groupName,
 					canLeaveAloneToday, allowedToLeaveFromTime, selfDismissalId, alreadyCheckedOut,

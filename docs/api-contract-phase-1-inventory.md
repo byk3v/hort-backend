@@ -57,10 +57,10 @@ There is no effective operation-level role matrix yet.
 | Self-dismissals | `POST /api/self-dismissals` | `SelfDismissalCreateRequest` | UUID body, `201` | Overlaps the missing unified permissions API |
 | Self-dismissals | `PUT /api/self-dismissals/{id}/revoke` | none | `204` | Action semantics need to align with pickup rights |
 | Self-dismissals | `GET /api/self-dismissals` | `studentId` UUID | `List<SelfDismissalDto>` | Path does not express that the list is student-scoped |
-| Checkout | `POST /api/checkout/confirm` | `CheckOutCreateRequest` | empty `201` | Conditional payload rules are not expressed by bean validation |
-| Checkout | `GET /api/checkout/search` | `q` string | `CheckOutSearchResponse` | Search shorter than two characters returns an empty result |
-| Checkout | `GET /api/checkout/by-student` | `studentId` UUID | `List<CheckOutDto>` | Query naming and resource boundary need stabilization |
-| Checkout | `GET /api/checkout/by-student-and-day` | `studentId`, ISO date | `List<CheckOutDto>` | Date/time timezone policy is not declared |
+| Attendance | `GET /api/v1/attendance/check-in-candidates` | `q`, `page`, `size` | paginated candidates | Tenant-scoped students that may start today's session |
+| Attendance | `POST /api/v1/attendance/check-ins` | `studentId` UUID | attendance session, `201` | Creates the student's only session for the `Europe/Berlin` operational day |
+| Attendance | `GET /api/v1/attendance/present-students` | `q`, `page`, `size` | paginated open sessions | Checkout search exposes only students checked in today |
+| Attendance | `POST /api/v1/attendance/check-outs` | discriminated pickup-right or self-dismissal request | checkout result, `201` | Validates the authorization and closes the session atomically |
 
 ## Missing backend surface used by web
 
@@ -86,7 +86,7 @@ numeric permission DTO prototypes should not be published as a stable contract.
 | --- | --- | --- |
 | Permission duration | `PERMANENT`, `DAILY` | Web/prototype: `DAUER`, `TAGES` |
 | Permission status | `ACTIVE`, `REVOKED`, `EXPIRED` | Prototype comment mentions `INACTIVE` |
-| Permission subject | Separate `PickupRight` and `SelfDismissal` | Prototype: `COLLECTOR`, `SELF_DISMISSAL` plus `canLeaveAlone` |
+| Permission subject | Separate `PickupRight` and `SelfDismissal` | `self_dismissal` is the sole source of truth for autonomous departure |
 | Collector type | `COLLECTOR`, `STUDENT` | Some DTOs expose unchecked `String` |
 
 The weekly recurring structure in `NewPermissionWeeklyAllowedFrom` has no
@@ -101,13 +101,11 @@ explicit data-model decision.
   group and collectors fields that do not belong to new-student input.
 - Collector and student string lengths are not validated consistently with the
   database schema.
-- `CheckOutCreateRequest.selfDismissal` is nullable although business behavior
-  treats it as a mode selector.
-- Checkout does not express the mutually exclusive collector/pickup-right and
-  self-dismissal variants structurally.
+- The stabilized attendance checkout request uses an explicit mode and validates
+  the mutually exclusive pickup-right and self-dismissal variants.
 - Validity intervals do not reject `validUntil < validFrom`.
-- Date-time fields use `LocalDateTime`; the API timezone and offset policy is
-  not defined.
+- Attendance instants use offset-aware values stored in UTC; the operational
+  date is calculated in `Europe/Berlin`.
 
 ## Error behavior
 
@@ -143,5 +141,8 @@ An operation-level matrix must be approved before adding `@PreAuthorize`.
 5. Stabilize collectors.
 6. Implement one coherent permissions API over pickup rights and
    self-dismissals.
-7. Stabilize checkout conditional requests and time semantics.
-8. Remove legacy paths/types only after the web consumer has migrated.
+7. **Completed:** model daily attendance, stabilize check-in/checkout
+   conditional requests and define time semantics.
+8. **Completed for checkout:** migrate the web consumer and remove the legacy
+   checkout HTTP paths. Continue removing other legacy paths only after their
+   consumers migrate.
