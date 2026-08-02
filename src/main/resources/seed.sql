@@ -26,8 +26,6 @@ CREATE TABLE IF NOT EXISTS `group` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `student` (
-                                         `allowed_time_to_leave` date DEFAULT NULL,
-                                         `can_leave_alone` bit(1) NOT NULL,
     `group_id` bigint NOT NULL,
     `id` bigint NOT NULL AUTO_INCREMENT,
     `person_id` bigint NOT NULL,
