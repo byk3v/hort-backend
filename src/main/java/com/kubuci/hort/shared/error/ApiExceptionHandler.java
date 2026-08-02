@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,6 +76,11 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(EntityNotFoundException.class)
 	ResponseEntity<ProblemDetail> notFound(EntityNotFoundException exception, HttpServletRequest request) {
 		return response(HttpStatus.NOT_FOUND, "resource_not_found", exception.getMessage(), request);
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class)
+	ResponseEntity<ProblemDetail> routeNotFound(NoResourceFoundException exception, HttpServletRequest request) {
+		return response(HttpStatus.NOT_FOUND, "resource_not_found", "The requested resource does not exist.", request);
 	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)

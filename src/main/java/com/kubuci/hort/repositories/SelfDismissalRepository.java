@@ -1,6 +1,6 @@
 package com.kubuci.hort.repositories;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UU
             and s.validFrom <= :at
             and (s.validUntil is null or s.validUntil >= :at)
         """)
-	List<SelfDismissal> findActiveFor(@Param("studentId") UUID studentId, @Param("at") LocalDateTime at);
+	List<SelfDismissal> findActiveFor(@Param("studentId") UUID studentId, @Param("at") OffsetDateTime at);
 
 	List<SelfDismissal> findByStudent_Id(UUID studentId);
 
@@ -27,8 +27,18 @@ public interface SelfDismissalRepository extends JpaRepository<SelfDismissal, UU
             select sd
             from SelfDismissal sd
             where sd.student.id = :studentId
+			  and sd.status = 'ACTIVE'
               and sd.validFrom <= :now
               and (sd.validUntil is null or sd.validUntil >= :now)
         """)
-	Optional<SelfDismissal> findActiveForStudentAt(@Param("studentId") UUID studentId, @Param("now") LocalDateTime now);
+	Optional<SelfDismissal> findActiveForStudentAt(@Param("studentId") UUID studentId,
+		@Param("now") OffsetDateTime now);
+
+	@Query("""
+		select sd from SelfDismissal sd
+		join fetch sd.student s
+		join fetch s.person sp
+		join fetch s.group g
+		""")
+	List<SelfDismissal> findAllForAuthorizationView();
 }

@@ -1,6 +1,6 @@
 package com.kubuci.hort.repositories;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
           and (pr.validUntil is null or pr.validUntil >= :at)
         """)
 	List<PickupRight> findAllActiveByStudentIdsWithCollectorPerson(@Param("studentIds") List<UUID> studentIds,
-		@Param("at") LocalDateTime at); // en caso de que quiera coger los que tengan derechos activos hoy
+		@Param("at") OffsetDateTime at); // en caso de que quiera coger los que tengan derechos activos hoy
 
 	@Query("""
           select p from PickupRight p
@@ -40,7 +40,7 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
             and p.validFrom <= :at
             and (p.validUntil is null or p.validUntil >= :at)
         """)
-	List<PickupRight> findActiveFor(@Param("studentId") UUID studentId, @Param("at") LocalDateTime at);
+	List<PickupRight> findActiveFor(@Param("studentId") UUID studentId, @Param("at") OffsetDateTime at);
 
 	List<PickupRight> findByStudent_Id(UUID studentId);
 
@@ -52,8 +52,19 @@ public interface PickupRightRepository extends JpaRepository<PickupRight, UUID> 
             join fetch pr.collector c
             join fetch c.person cp
             where pr.student.id = :studentId
+			  and pr.status = 'ACTIVE'
               and pr.validFrom <= :now
               and (pr.validUntil is null or pr.validUntil >= :now)
         """)
-	List<PickupRight> findActiveForStudentAt(@Param("studentId") UUID studentId, @Param("now") LocalDateTime now);
+	List<PickupRight> findActiveForStudentAt(@Param("studentId") UUID studentId, @Param("now") OffsetDateTime now);
+
+	@Query("""
+		select pr from PickupRight pr
+		join fetch pr.student s
+		join fetch s.person sp
+		join fetch s.group g
+		join fetch pr.collector c
+		join fetch c.person cp
+		""")
+	List<PickupRight> findAllForAuthorizationView();
 }

@@ -1,6 +1,6 @@
 package com.kubuci.hort.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import com.kubuci.hort.enums.CollectorType;
 import com.kubuci.hort.enums.PermissionType;
@@ -13,8 +13,8 @@ public record CollectorForOnboarding(
 	@NotBlank String lastName,
 	String address,
 	String phone,
-	LocalDateTime validFrom,
-	LocalDateTime validUntil,
+	OffsetDateTime validFrom,
+	OffsetDateTime validUntil,
 	@NotNull CollectorType type, // "Aqui tengo adulto o alumno", hay que adicionar un boolean MainCollector
 	@NotNull PermissionType permissionType,
 	boolean mainCollector) {

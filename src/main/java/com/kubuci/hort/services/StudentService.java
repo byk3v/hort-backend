@@ -1,6 +1,7 @@
 package com.kubuci.hort.services;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,7 +196,7 @@ public class StudentService {
 			right.setType(collectorRequest.permissionType());
 			right.setStatus(PermissionStatus.ACTIVE);
 			right.setValidFrom(collectorRequest.validFrom() == null
-				? LocalDateTime.now()
+				? OffsetDateTime.now(ZoneOffset.UTC)
 				: collectorRequest.validFrom());
 			right.setValidUntil(collectorRequest.validUntil());
 			right.setMainCollector(collectorRequest.mainCollector());
@@ -335,10 +336,10 @@ public class StudentService {
 			right.setCollector(collector);
 			right.setType(cReq.permissionType());
 			right.setStatus(PermissionStatus.ACTIVE);
-			LocalDateTime effectiveFrom = cReq.validFrom() != null
+			OffsetDateTime effectiveFrom = cReq.validFrom() != null
 				? cReq.validFrom()
-				: LocalDateTime.now();
-			LocalDateTime effectiveUntil = cReq.validUntil() != null
+				: OffsetDateTime.now(ZoneOffset.UTC);
+			OffsetDateTime effectiveUntil = cReq.validUntil() != null
 				? cReq.validUntil()
 				: null;
 			right.setValidFrom(effectiveFrom);

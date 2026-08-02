@@ -1,6 +1,6 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.LocalTime;
 
 import com.kubuci.hort.enums.PermissionStatus;
@@ -40,10 +40,10 @@ public class PickupRight extends BaseEntity {
 	private PermissionType type;
 
 	@Column(name = "valid_from", nullable = false)
-	private LocalDateTime validFrom;
+	private OffsetDateTime validFrom;
 
 	@Column(name = "valid_until")
-	private LocalDateTime validUntil;
+	private OffsetDateTime validUntil;
 
 	@Column(name = "allowed_from_time")
 	private LocalTime allowedFromTime;

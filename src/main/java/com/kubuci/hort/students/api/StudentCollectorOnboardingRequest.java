@@ -1,6 +1,6 @@
 package com.kubuci.hort.students.api;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,8 +15,8 @@ public record StudentCollectorOnboardingRequest(
 	UUID existingCollectorId,
 	@Valid NewCollectorRequest newCollector,
 	@NotNull PermissionType permissionType,
-	LocalDateTime validFrom,
-	LocalDateTime validUntil,
+	OffsetDateTime validFrom,
+	OffsetDateTime validUntil,
 	boolean mainCollector) {
 
 	@JsonIgnore
