@@ -2,6 +2,8 @@ package com.kubuci.hort.services;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +52,7 @@ public class CheckOutService {
 			.orElseThrow(() -> new EntityNotFoundException("Student not found: " + req.studentId()));
 
 		LocalDateTime now = LocalDateTime.now();
+		OffsetDateTime authorizationNow = OffsetDateTime.now(ZoneOffset.UTC);
 
 		CheckOut abmeldung = new CheckOut();
 		abmeldung.setHort(hort);
@@ -64,7 +67,7 @@ public class CheckOutService {
 			abmeldung.setPickupRight(null);
 			abmeldung.setCollectorType(CollectorType.STUDENT);
 
-			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), now);
+			var dismissalOpt = selfDismissalRepo.findActiveForStudentAt(student.getId(), authorizationNow);
 			SelfDismissal dismissal = dismissalOpt.orElse(null);
 			abmeldung.setSelfDismissal(dismissal);
 
@@ -122,7 +125,7 @@ public class CheckOutService {
 			return new CheckOutSearchResponse(List.of());
 		}
 
-		LocalDateTime now = LocalDateTime.now();
+		OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
 		String[] parts = normalized.split("\\s+");
 		List<Student> matches;

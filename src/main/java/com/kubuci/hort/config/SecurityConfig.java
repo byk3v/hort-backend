@@ -12,10 +12,17 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.kubuci.hort.shared.error.SecurityProblemHandlers;
+
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final SecurityProblemHandlers securityProblemHandlers;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -26,7 +33,11 @@ public class SecurityConfig {
 				// .requestMatchers("/public/**").permitAll()
 				.anyRequest()
 				.authenticated())
-			.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter))
+				.authenticationEntryPoint(securityProblemHandlers::authenticationRequired))
+			.exceptionHandling(exceptions -> exceptions
+				.authenticationEntryPoint(securityProblemHandlers::authenticationRequired)
+				.accessDeniedHandler(securityProblemHandlers::accessDenied))
 			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();

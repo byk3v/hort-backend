@@ -4,12 +4,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.kubuci.hort.models.Collector;
 
-public interface CollectorRepository extends JpaRepository<Collector, UUID> {
+public interface CollectorRepository extends JpaRepository<Collector, UUID>, JpaSpecificationExecutor<Collector> {
 	Optional<Collector> findByPerson_Id(UUID personId);
 
 	boolean existsByPerson_Id(UUID personId);

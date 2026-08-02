@@ -145,6 +145,8 @@ class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 		assertThat(stored).isNotNull();
 		assertThat(stored.get("hort_id")).isEqualTo(HORT_2);
 		assertThat(stored.get("created_by")).isEqualTo("hort-2-admin-subject");
+
+		groupService.delete(groupId);
 	}
 
 	@Test

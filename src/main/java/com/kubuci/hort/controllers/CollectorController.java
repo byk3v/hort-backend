@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,11 +30,13 @@ public class CollectorController {
 	private final CollectorService collectorService;
 
 	@GetMapping
+	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<List<CollectorDto>> list() {
 		return ResponseEntity.ok(collectorService.list());
 	}
 
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<CollectorDto> getById(@PathVariable UUID id) {
 		return ResponseEntity.ok(collectorService.getById(id));
 	}
@@ -48,6 +51,7 @@ public class CollectorController {
 
 	// Crea collector + person en una sola llamada
 	@PostMapping
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<UUID> createWithPerson(@Valid @RequestBody CollectorSaveWithPersonRequest req) {
 		UUID id = collectorService.createWithPerson(req);
 		return ResponseEntity.created(URI.create("/api/collectors/" + id))
@@ -55,6 +59,7 @@ public class CollectorController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody CollectorSaveRequest req) {
 		collectorService.update(id, req);
 		return ResponseEntity.noContent()
@@ -62,6 +67,7 @@ public class CollectorController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable UUID id) {
 		collectorService.delete(id);
 		return ResponseEntity.noContent()

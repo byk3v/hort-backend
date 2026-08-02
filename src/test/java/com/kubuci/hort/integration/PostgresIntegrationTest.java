@@ -1,24 +1,26 @@
 package com.kubuci.hort.integration;
 
 import org.junit.jupiter.api.AfterEach;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
-@Testcontainers
+@AutoConfigureMockMvc
 abstract class PostgresIntegrationTest {
 
-	@Container
 	static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16")
 		.withDatabaseName("hortdb")
 		.withUsername("hort_migrations")
 		.withPassword("hort_migrations_test")
 		.withInitScript("db/testcontainer/init.sql");
+
+	static {
+		POSTGRES.start();
+	}
 
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {

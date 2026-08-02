@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,18 +32,21 @@ public class GroupController {
 
 	// lista
 	@GetMapping
+	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<List<GroupDto>> list() {
 		return ResponseEntity.ok(groupService.list());
 	}
 
 	// groupById
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('HORT_ADMIN', 'ASSISTANT')")
 	public ResponseEntity<GroupDto> getById(@PathVariable UUID id) {
 		return ResponseEntity.ok(groupService.getById(id));
 	}
 
 	// saveGroup (create)
 	@PostMapping
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<UUID> save(@Valid @RequestBody GroupSaveRequest req) {
 		UUID id = groupService.save(req);
 		return ResponseEntity.created(URI.create("/api/groups/" + id))
@@ -51,6 +55,7 @@ public class GroupController {
 
 	// update
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody GroupUpdateRequest req) {
 		groupService.update(id, req);
 		return ResponseEntity.noContent()
@@ -59,6 +64,7 @@ public class GroupController {
 
 	// delete
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('HORT_ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable UUID id) {
 		groupService.delete(id);
 		return ResponseEntity.noContent()

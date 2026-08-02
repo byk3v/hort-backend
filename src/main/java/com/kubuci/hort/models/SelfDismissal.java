@@ -1,10 +1,13 @@
 package com.kubuci.hort.models;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.LocalTime;
 
 import com.kubuci.hort.enums.PermissionStatus;
 import com.kubuci.hort.models.entity.BaseEntity;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -26,15 +29,16 @@ public class SelfDismissal extends BaseEntity {
 	private Student student;
 
 	@Column(name = "valid_from", nullable = false)
-	private LocalDateTime validFrom;
+	private OffsetDateTime validFrom;
 
 	@Column(name = "valid_until")
-	private LocalDateTime validUntil;
+	private OffsetDateTime validUntil;
 
 	@Column(name = "allowed_from_time")
 	private LocalTime allowedFromTime;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status", nullable = false)
 	private PermissionStatus status;
 }
