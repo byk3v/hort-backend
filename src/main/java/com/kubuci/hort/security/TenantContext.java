@@ -38,6 +38,15 @@ public class TenantContext {
 		return subject;
 	}
 
+	public String requireUsername() {
+		String username = requireJwtAuthentication().getToken()
+			.getClaimAsString("preferred_username");
+		if (username == null || username.isBlank()) {
+			throw new AccessDeniedException("Missing required preferred_username claim");
+		}
+		return username;
+	}
+
 	private JwtAuthenticationToken requireJwtAuthentication() {
 		var authentication = SecurityContextHolder.getContext()
 			.getAuthentication();

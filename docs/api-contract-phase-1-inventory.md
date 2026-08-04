@@ -61,6 +61,7 @@ There is no effective operation-level role matrix yet.
 | Attendance | `POST /api/v1/attendance/check-ins` | `studentId` UUID | attendance session, `201` | Creates the student's only session for the `Europe/Berlin` operational day |
 | Attendance | `GET /api/v1/attendance/present-students` | `q`, `page`, `size` | paginated open sessions | Checkout search exposes only students checked in today |
 | Attendance | `POST /api/v1/attendance/check-outs` | discriminated pickup-right or self-dismissal request | checkout result, `201` | Validates the authorization and closes the session atomically |
+| Identity | `GET /api/v1/me` | authenticated JWT | username and resolved Hort | Tenant is derived from `hort_id`; the client cannot select it |
 
 ## Missing backend surface used by web
 
