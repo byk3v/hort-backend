@@ -113,16 +113,6 @@ class GroupV1ApiIntegrationTest extends PostgresIntegrationTest {
 			.andExpect(jsonPath("$.code").value("data_conflict"));
 	}
 
-	@Test
-	void keepsTheLegacyReadPathButAppliesTheSameAuthorization() throws Exception {
-		mockMvc.perform(get("/api/groups").with(user(HORT_1, "ASSISTANT")))
-			.andExpect(status().isOk());
-
-		mockMvc.perform(get("/api/groups").with(user(HORT_1, "PARENT")))
-			.andExpect(status().isForbidden())
-			.andExpect(jsonPath("$.code").value("access_denied"));
-	}
-
 	private JwtRequestPostProcessor user(String hortId, String role) {
 		return jwt().jwt(token -> token.subject("test-user")
 			.claim("hort_id", hortId))

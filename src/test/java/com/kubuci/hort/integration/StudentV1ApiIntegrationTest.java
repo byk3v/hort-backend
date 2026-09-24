@@ -168,16 +168,6 @@ class StudentV1ApiIntegrationTest extends PostgresIntegrationTest {
 			.andExpect(jsonPath("$.code").value("resource_not_found"));
 	}
 
-	@Test
-	void preservesTheLegacyListWithTheSameReadAuthorization() throws Exception {
-		mockMvc.perform(get("/api/students").with(user(HORT_1, "ASSISTANT")))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(9)));
-
-		mockMvc.perform(get("/api/students").with(user(HORT_1, "PARENT")))
-			.andExpect(status().isForbidden());
-	}
-
 	private String validExistingCollectorRequest(String firstName) {
 		return """
 			{

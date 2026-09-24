@@ -2,119 +2,81 @@
 
 ## Scope
 
-This document records the HTTP behavior found before implementing Phase 1 of
-the API contract migration. It is an inventory, not a declaration that the
-current behavior is the target contract.
+This document records the active HTTP contract after the Phase 1 backend/web
+stabilization and legacy cleanup. It is the working inventory for closing Phase
+1 before introducing generated OpenAPI and TypeScript clients.
 
-## Approved first increment
+## Current state (2026-09-24)
 
-The following decisions were approved for the first Phase 1 vertical slice:
+Backend and web are functional. Mobile remains an Expo template and does not
+consume the HORT API yet.
 
-- introduce the stable groups resource at `/api/v1/groups` while preserving
-  `/api/groups` as a temporary compatibility path;
-- use RFC 9457 Problem Details with the extensions `code`, `traceId`, and
-  `fieldErrors` where validation applies;
-- map expected failures consistently to `400`, `401`, `403`, `404`, `409`,
-  and `500` without exposing internal exception details;
-- allow `HORT_ADMIN` to read and write groups, allow `ASSISTANT` to read them,
-  and deny group-catalog access to `PARENT`.
+The backend no longer exposes the legacy unversioned application paths that were
+kept during earlier compatibility work:
 
-The initial implementation applies this matrix to both the versioned and
-legacy group paths. The versioned create operation returns the created
-`GroupDto` and a versioned `Location` header. The legacy create response remains
-the UUID scalar expected by existing clients. Cross-tenant identifiers and
-unknown identifiers intentionally share the same `404 resource_not_found`
-response to avoid disclosing another tenant's data.
+- `/api/groups`
+- `/api/students`
+- `/api/collectors`
+- `/api/persons`
+- `/api/pickup-rights`
+- `/api/self-dismissals`
+- `/api/checkout/*`
+- `/api/permissions`
 
-## Current HTTP surface
+Unused legacy controllers, DTOs, and services for those paths were removed. The
+active web app consumes only `/api/v1` route handlers.
+
+## Active HTTP surface
 
 All current endpoints require an authenticated JWT at the filter-chain level.
-There is no effective operation-level role matrix yet.
+Operation-level authorization is enforced on the versioned controllers.
 
-| Feature | Method and path | Request | Response | Current concerns |
+| Feature | Method and path | Request | Response | Roles |
 | --- | --- | --- | --- | --- |
-| Groups | `GET /api/groups` | none | `List<GroupDto>` | No pagination; no operation role |
-| Groups | `GET /api/groups/{id}` | UUID path | `GroupDto` | Entity-not-found has no stable error contract |
-| Groups | `POST /api/groups` | `GroupSaveRequest` | UUID body, `201` | Resource response shape is inconsistent with other operations |
-| Groups | `PUT /api/groups/{id}` | `GroupUpdateRequest` | `204` | No operation role |
-| Groups | `DELETE /api/groups/{id}` | UUID path | `204` | Referential conflicts have no stable error contract |
-| People | `GET /api/persons` | none | `List<PersonDto>` | Public need and role are not established |
-| People | `GET /api/persons/{id}` | UUID path | `PersonDto` | Same error issue as groups |
-| People | `POST /api/persons` | `PersonSaveRequest` | UUID body, `201` | Exposes an independent person lifecycle that may bypass feature workflows |
-| People | `PUT /api/persons/{id}` | `PersonUpdateRequest` | `204` | No operation role |
-| People | `DELETE /api/persons/{id}` | UUID path | `204` | No operation role |
-| Students | `GET /api/students` | optional `name`, `groupId` UUID | `List<StudentDto>` | Unpaged; frontend types still use numeric IDs |
-| Students | `POST /api/students` | `StudentOnboardingRequest` | `StudentOnboardingResponse`, `201` | Reuses response `StudentDto` as nested request data; validation is incomplete |
-| Collectors | `GET /api/collectors` | none | `List<CollectorDto>` | `collectorType` is an unchecked string in the DTO |
-| Collectors | `GET /api/collectors/{id}` | UUID path | `CollectorDto` | No stable not-found error |
-| Collectors | `POST /api/collectors` | `CollectorSaveWithPersonRequest` | UUID body, `201` | `collectorType` is accepted as string and parsed with `valueOf` |
-| Collectors | `PUT /api/collectors/{id}` | `CollectorSaveRequest` | `204` | Allows relinking a collector to a person; intended semantics are unclear |
-| Collectors | `DELETE /api/collectors/{id}` | UUID path | `204` | No operation role |
-| Pickup rights | `POST /api/pickup-rights` | `PickupRightCreateRequest` | UUID body, `201` | Overlaps the missing unified permissions API |
-| Pickup rights | `PUT /api/pickup-rights/{id}/revoke` | none | `204` | Action uses `PUT`; idempotency needs to be declared |
-| Pickup rights | `GET /api/pickup-rights/by-student` | `studentId` UUID | `List<PickupRightDto>` | Query naming and missing parent resource boundary |
-| Pickup rights | `GET /api/pickup-rights/by-collector` | `collectorId` UUID | `List<PickupRightDto>` | Same concern |
-| Self-dismissals | `POST /api/self-dismissals` | `SelfDismissalCreateRequest` | UUID body, `201` | Overlaps the missing unified permissions API |
-| Self-dismissals | `PUT /api/self-dismissals/{id}/revoke` | none | `204` | Action semantics need to align with pickup rights |
-| Self-dismissals | `GET /api/self-dismissals` | `studentId` UUID | `List<SelfDismissalDto>` | Path does not express that the list is student-scoped |
-| Attendance | `GET /api/v1/attendance/check-in-candidates` | `q`, `page`, `size` | paginated candidates | Tenant-scoped students that may start today's session |
-| Attendance | `POST /api/v1/attendance/check-ins` | `studentId` UUID | attendance session, `201` | Creates the student's only session for the `Europe/Berlin` operational day |
-| Attendance | `GET /api/v1/attendance/present-students` | `q`, `page`, `size` | paginated open sessions | Checkout search exposes only students checked in today |
-| Attendance | `POST /api/v1/attendance/check-outs` | discriminated pickup-right or self-dismissal request | checkout result, `201` | Validates the authorization and closes the session atomically |
-| Identity | `GET /api/v1/me` | authenticated JWT | username and resolved Hort | Tenant is derived from `hort_id`; the client cannot select it |
+| Groups | `GET /api/v1/groups` | none | `List<GroupDto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Groups | `GET /api/v1/groups/{id}` | UUID path | `GroupDto` | `HORT_ADMIN`, `ASSISTANT` |
+| Groups | `POST /api/v1/groups` | `GroupSaveRequest` | `GroupDto`, `201` | `HORT_ADMIN` |
+| Groups | `PUT /api/v1/groups/{id}` | `GroupUpdateRequest` | `204` | `HORT_ADMIN` |
+| Groups | `DELETE /api/v1/groups/{id}` | UUID path | `204` | `HORT_ADMIN` |
+| Students | `GET /api/v1/students` | optional `name`, `groupId`, `page`, `size`, `sort` | `PageResponse<StudentV1Dto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Students | `GET /api/v1/students/{id}` | UUID path | `StudentV1Dto` | `HORT_ADMIN`, `ASSISTANT` |
+| Students | `POST /api/v1/students` | `StudentOnboardingV1Request` | `StudentV1Dto`, `201` | `HORT_ADMIN` |
+| Collectors | `GET /api/v1/collectors` | optional `name`, `page`, `size` | `PageResponse<CollectorV1Dto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Collectors | `GET /api/v1/collectors/{id}` | UUID path | `CollectorV1Dto` | `HORT_ADMIN`, `ASSISTANT` |
+| Collectors | `POST /api/v1/collectors` | `CollectorWriteRequest` | `CollectorV1Dto`, `201` | `HORT_ADMIN` |
+| Collectors | `PUT /api/v1/collectors/{id}` | `CollectorWriteRequest` | `CollectorV1Dto` | `HORT_ADMIN` |
+| Collectors | `DELETE /api/v1/collectors/{id}` | UUID path | `204` | `HORT_ADMIN` |
+| Student authorizations | `GET /api/v1/student-authorizations` | `status`, optional `studentId`, `page`, `size` | `PageResponse<StudentAuthorizationDto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Student authorizations | `GET /api/v1/student-authorizations/{kind}/{id}` | kind and UUID path | `StudentAuthorizationDto` | `HORT_ADMIN`, `ASSISTANT` |
+| Student authorizations | `POST /api/v1/student-authorizations` | `StudentAuthorizationCreateRequest` | `StudentAuthorizationDto`, `201` | `HORT_ADMIN`, `ASSISTANT` |
+| Student authorizations | `PUT /api/v1/student-authorizations/{kind}/{id}/revoke` | none | `204` | `HORT_ADMIN`, `ASSISTANT` |
+| Attendance | `GET /api/v1/attendance/check-in-candidates` | optional `q`, `page`, `size` | `PageResponse<AttendanceStudentDto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Attendance | `POST /api/v1/attendance/check-ins` | `CheckInRequest` | `AttendanceSessionDto`, `201` | `HORT_ADMIN`, `ASSISTANT` |
+| Attendance | `GET /api/v1/attendance/present-students` | optional `q`, `page`, `size` | `PageResponse<PresentStudentDto>` | `HORT_ADMIN`, `ASSISTANT` |
+| Attendance | `POST /api/v1/attendance/check-outs` | `AttendanceCheckOutRequest` | `AttendanceCheckOutDto`, `201` | `HORT_ADMIN`, `ASSISTANT` |
+| Identity | `GET /api/v1/me` | authenticated JWT | `CurrentUserDto` | authenticated user |
 
-## Missing backend surface used by web
+`PARENT` remains deliberately excluded from administrative resources until a
+verified authenticated-user-to-child relationship exists and parent-scoped
+resources are designed.
 
-The web currently calls `GET /api/permissions` and `POST /api/permissions`, but
-the backend has no controller or service for those paths. The Java DTOs
-`NewPermissionRequest` and `PermissionViewDto` appear to be unfinished contract
-prototypes rather than an implemented API.
+## Identifier, enum, and time semantics
 
-## Identifier mismatches
-
-- Persistence and implemented backend DTOs use UUID.
-- `NewPermissionRequest` and `PermissionViewDto` still use `Long` identifiers.
-- The handwritten frontend types use `number` for groups, students,
-  collectors, pickup rights, self-dismissals and permissions.
-- `StudentOnboardingRequest.groupId` is UUID in Java and `number` in TypeScript.
-
-The Phase 1 target is UUID in Java and JSON string in TypeScript. Existing
-numeric permission DTO prototypes should not be published as a stable contract.
-
-## Enum and vocabulary mismatches
-
-| Concept | Persisted/backend enum | Other current vocabulary |
-| --- | --- | --- |
-| Permission duration | `PERMANENT`, `DAILY` | Web/prototype: `DAUER`, `TAGES` |
-| Permission status | `ACTIVE`, `REVOKED`, `EXPIRED` | Prototype comment mentions `INACTIVE` |
-| Permission subject | Separate `PickupRight` and `SelfDismissal` | `self_dismissal` is the sole source of truth for autonomous departure |
-| Collector type | `COLLECTOR`, `STUDENT` | Some DTOs expose unchecked `String` |
-
-The weekly recurring structure in `NewPermissionWeeklyAllowedFrom` has no
-matching persistence model. It cannot be promised by `/api/v1` without an
-explicit data-model decision.
-
-## Nullability and validation gaps
-
-- `StudentOnboardingRequest.student`, `groupId`, and `collectors` lack explicit
-  validation and nested `@Valid` boundaries.
-- The onboarding request embeds `StudentDto`, a response model containing ID,
-  group and collectors fields that do not belong to new-student input.
-- Collector and student string lengths are not validated consistently with the
-  database schema.
-- The stabilized attendance checkout request uses an explicit mode and validates
-  the mutually exclusive pickup-right and self-dismissal variants.
-- Validity intervals do not reject `validUntil < validFrom`.
-- Attendance instants use offset-aware values stored in UTC; the operational
-  date is calculated in `Europe/Berlin`.
+- Public entity identifiers are UUID values represented as JSON strings.
+- The active v1 authorization vocabulary uses `PICKUP_RIGHT` and
+  `SELF_DISMISSAL` for authorization kinds.
+- Authorization states are derived as `ACTIVE`, `SCHEDULED`, `EXPIRED`, and
+  `REVOKED`.
+- Permission duration uses the backend enum values `PERMANENT` and `DAILY`.
+- Validity timestamps use offset-aware ISO-8601 values at the API boundary and
+  UTC persistence.
+- Attendance uses the `Europe/Berlin` operational day; check-in and checkout
+  instants are generated by the backend.
 
 ## Error behavior
 
-There is no application `@RestControllerAdvice`. Exceptions currently fall
-through to Spring Boot's default error handling, so validation, not-found,
-conflict and authorization responses do not have one documented shape.
-
-Phase 1 needs stable mappings at least for:
+The backend uses application Problem Details through `ApiExceptionHandler` and
+security problem handlers. Phase 1 expects stable mappings for:
 
 - malformed JSON and bean validation;
 - invalid path/query values;
@@ -123,27 +85,27 @@ Phase 1 needs stable mappings at least for:
 - state/data conflicts;
 - unexpected internal failures without sensitive details.
 
-## Authorization inventory
+Cross-tenant identifiers and unknown identifiers intentionally share the same
+not-found shape to avoid disclosing another tenant's data.
 
-The realm roles are `HORT_ADMIN`, `ASSISTANT`, and `PARENT`. Spring converts
-them to `ROLE_*`, but controllers currently rely only on `authenticated()`.
-The commented student annotation is not an effective authorization rule.
+## Modularization state
 
-An operation-level matrix must be approved before adding `@PreAuthorize`.
+The backend is moving toward the target modular-monolith shape incrementally.
+Feature API/application packages exist for attendance, authorizations,
+collectors, groups, identity, and students. Shared JPA entities, repositories,
+and some services remain under global packages and should be moved only when a
+feature is already being changed.
 
-## Proposed incremental delivery
+The cleanup removed a large unversioned HTTP surface and old transport DTOs, but
+it did not perform a broad package move. That remains future incremental work.
 
-1. Approve API versioning, error representation, role matrix, permission model,
-   and time representation.
-2. Establish shared `/api/v1` error behavior and controller tests.
-3. Stabilize groups as the first vertical feature while temporarily preserving
-   the legacy path if compatibility is required.
-4. Stabilize student onboarding with dedicated request models and UUIDs.
-5. Stabilize collectors.
-6. Implement one coherent permissions API over pickup rights and
-   self-dismissals.
-7. **Completed:** model daily attendance, stabilize check-in/checkout
-   conditional requests and define time semantics.
-8. **Completed for checkout:** migrate the web consumer and remove the legacy
-   checkout HTTP paths. Continue removing other legacy paths only after their
-   consumers migrate.
+## Remaining Phase 1 work
+
+1. Review this table against the current controllers and tests before starting
+   Phase 2.
+2. Add or adjust role-matrix tests for any operation not explicitly covered.
+3. Confirm whether any remaining shared service methods are only compatibility
+   helpers and remove them in feature-sized changes.
+4. Keep mobile out of compatibility decisions until it has real HORT API
+   integration.
+5. Start Phase 2 only after the endpoint/role inventory is accepted.
