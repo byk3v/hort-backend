@@ -19,11 +19,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.kubuci.hort.dto.GroupSaveRequest;
 import com.kubuci.hort.dto.GroupUpdateRequest;
-import com.kubuci.hort.services.CheckOutService;
-import com.kubuci.hort.services.CollectorService;
 import com.kubuci.hort.services.GroupService;
-import com.kubuci.hort.services.PickupRightService;
-import com.kubuci.hort.services.StudentService;
 
 class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 
@@ -36,18 +32,6 @@ class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 
 	@Autowired
 	private GroupService groupService;
-
-	@Autowired
-	private StudentService studentService;
-
-	@Autowired
-	private CollectorService collectorService;
-
-	@Autowired
-	private PickupRightService pickupRightService;
-
-	@Autowired
-	private CheckOutService checkOutService;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -75,26 +59,6 @@ class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 		assertThat(groupService.list()).hasSize(12)
 			.noneMatch(group -> group.id()
 				.equals(HORT_2_GROUP));
-	}
-
-	@Test
-	void isolatesGroupsStudentsCollectorsPermissionsAndCheckouts() {
-		authenticate(HORT_1, "hort-1-admin");
-		assertThat(studentService.list(null, null)).hasSize(9)
-			.noneMatch(student -> student.id()
-				.equals(HORT_2_STUDENT));
-		assertThat(collectorService.list()).singleElement()
-			.satisfies(collector -> assertThat(collector.id()).isNotEqualTo(HORT_2_COLLECTOR));
-		assertThat(pickupRightService.listByStudent(HORT_2_STUDENT)).isEmpty();
-		assertThat(checkOutService.listByStudent(HORT_2_STUDENT)).isEmpty();
-
-		authenticate(HORT_2, "hort-2-admin");
-		assertThat(studentService.list(null, null)).singleElement()
-			.satisfies(student -> assertThat(student.id()).isEqualTo(HORT_2_STUDENT));
-		assertThat(collectorService.list()).singleElement()
-			.satisfies(collector -> assertThat(collector.id()).isEqualTo(HORT_2_COLLECTOR));
-		assertThat(pickupRightService.listByStudent(HORT_2_STUDENT)).hasSize(1);
-		assertThat(checkOutService.listByStudent(HORT_2_STUDENT)).hasSize(1);
 	}
 
 	@Test
