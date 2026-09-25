@@ -2,6 +2,7 @@ package com.kubuci.hort.integration;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -28,7 +29,9 @@ class CollectorAuthorizationV1ApiIntegrationTest extends PostgresIntegrationTest
 	private static final String HORT_1 = "11111111-1111-1111-1111-111111111111";
 	private static final String HORT_1_STUDENT = "cccccccc-cccc-cccc-cccc-ccccccccccc1";
 	private static final String HORT_1_COLLECTOR = "dddddddd-dddd-dddd-dddd-ddddddddddd1";
+	private static final String HORT_1_PICKUP_RIGHT = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee1";
 	private static final String HORT_2_COLLECTOR = "22222222-dddd-dddd-dddd-ddddddddddd1";
+	private static final String HORT_2_PICKUP_RIGHT = "22222222-eeee-eeee-eeee-eeeeeeeeeee1";
 
 	@Autowired private MockMvc mockMvc;
 	@Autowired private ObjectMapper objectMapper;
@@ -45,7 +48,60 @@ class CollectorAuthorizationV1ApiIntegrationTest extends PostgresIntegrationTest
 
 		mockMvc.perform(get("/api/v1/collectors").with(user("PARENT")))
 			.andExpect(status().isForbidden());
-}
+	}
+
+	@Test
+	void collectorDetailAndMutationsAreRoleProtectedAndTenantScoped() throws Exception {
+		mockMvc.perform(get("/api/v1/collectors/{id}", HORT_1_COLLECTOR).with(user("ASSISTANT")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(HORT_1_COLLECTOR));
+
+		mockMvc.perform(get("/api/v1/collectors/{id}", HORT_1_COLLECTOR).with(user("PARENT")))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+
+		mockMvc.perform(get("/api/v1/collectors/{id}", HORT_2_COLLECTOR).with(user("HORT_ADMIN")))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("resource_not_found"));
+		mockMvc.perform(get("/api/v1/collectors/{id}", UUID.randomUUID()).with(user("HORT_ADMIN")))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("resource_not_found"));
+
+		String body = """
+			{"firstName":"Role","lastName":"Matrix","address":"Test","phone":"123"}
+			""";
+		mockMvc.perform(post("/api/v1/collectors").with(user("ASSISTANT"))
+			.contentType(MediaType.APPLICATION_JSON).content(body))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(put("/api/v1/collectors/{id}", HORT_1_COLLECTOR).with(user("ASSISTANT"))
+			.contentType(MediaType.APPLICATION_JSON).content(body))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(delete("/api/v1/collectors/{id}", HORT_1_COLLECTOR).with(user("ASSISTANT")))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+
+		String response = mockMvc.perform(post("/api/v1/collectors").with(user("HORT_ADMIN"))
+			.contentType(MediaType.APPLICATION_JSON).content(body))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.firstName").value("Role"))
+			.andReturn().getResponse().getContentAsString();
+		UUID createdId = UUID.fromString(objectMapper.readTree(response).get("id").asText());
+		try {
+			mockMvc.perform(put("/api/v1/collectors/{id}", createdId).with(user("HORT_ADMIN"))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("""
+					{"firstName":"Updated","lastName":"Matrix","address":"Test","phone":"456"}
+					"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.firstName").value("Updated"));
+		}
+		finally {
+			mockMvc.perform(delete("/api/v1/collectors/{id}", createdId).with(user("HORT_ADMIN")))
+				.andExpect(status().isNoContent());
+		}
+	}
 
 	@Test
 	void exposesUnifiedActiveAuthorizationsWithoutCrossTenantData() throws Exception {
@@ -60,6 +116,36 @@ class CollectorAuthorizationV1ApiIntegrationTest extends PostgresIntegrationTest
 
 		mockMvc.perform(get("/api/v1/student-authorizations").with(user("PARENT")))
 			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void authorizationDetailMutationRolesAndTenantHidingAreStable() throws Exception {
+		mockMvc.perform(get("/api/v1/student-authorizations/PICKUP_RIGHT/{id}", HORT_1_PICKUP_RIGHT)
+			.with(user("PARENT")))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(post("/api/v1/student-authorizations").with(user("PARENT"))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("""
+				{"kind":"PICKUP_RIGHT","studentId":"%s","duration":"PERMANENT",
+				 "validFrom":"2026-01-01T00:00:00Z",
+				 "collector":{"source":"EXISTING","existingCollectorId":"%s"}}
+				""".formatted(HORT_1_STUDENT, HORT_1_COLLECTOR)))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(put("/api/v1/student-authorizations/PICKUP_RIGHT/{id}/revoke", HORT_1_PICKUP_RIGHT)
+			.with(user("PARENT")))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+
+		mockMvc.perform(get("/api/v1/student-authorizations/PICKUP_RIGHT/{id}", HORT_2_PICKUP_RIGHT)
+			.with(user("HORT_ADMIN")))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("resource_not_found"));
+		mockMvc.perform(put("/api/v1/student-authorizations/PICKUP_RIGHT/{id}/revoke", HORT_2_PICKUP_RIGHT)
+			.with(user("HORT_ADMIN")))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("resource_not_found"));
 	}
 
 	@Test

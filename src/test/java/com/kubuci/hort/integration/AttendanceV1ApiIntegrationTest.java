@@ -45,6 +45,27 @@ class AttendanceV1ApiIntegrationTest extends PostgresIntegrationTest {
 	}
 
 	@Test
+	void attendanceOperationsRejectParentRole() throws Exception {
+		mockMvc.perform(get("/api/v1/attendance/present-students").with(user("PARENT")))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(post("/api/v1/attendance/check-ins").with(user("PARENT"))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("""
+				{"studentId":"%s"}
+				""".formatted(STUDENT)))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+		mockMvc.perform(post("/api/v1/attendance/check-outs").with(user("PARENT"))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("""
+				{"attendanceId":"%s","method":"PICKUP","collectorId":"%s","pickupRightId":"%s"}
+				""".formatted(UUID.randomUUID(), COLLECTOR, PICKUP_RIGHT)))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("access_denied"));
+	}
+
+	@Test
 	void checkInCreatesPresenceAndRejectsSecondDailySession() throws Exception {
 		JsonNode session = checkIn();
 		UUID attendanceId = UUID.fromString(session.get("id").asText());

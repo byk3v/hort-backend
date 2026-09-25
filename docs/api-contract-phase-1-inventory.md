@@ -2,11 +2,11 @@
 
 ## Scope
 
-This document records the active HTTP contract after the Phase 1 backend/web
-stabilization and legacy cleanup. It is the working inventory for closing Phase
-1 before introducing generated OpenAPI and TypeScript clients.
+This document records the accepted Phase 1 HTTP contract after backend/web
+stabilization, legacy cleanup, role-matrix hardening, and final shared-service
+review. It is the baseline for Phase 2 OpenAPI work.
 
-## Current state (2026-09-24)
+## Current state (2026-09-25)
 
 Backend and web are functional. Mobile remains an Expo template and does not
 consume the HORT API yet.
@@ -23,8 +23,9 @@ kept during earlier compatibility work:
 - `/api/checkout/*`
 - `/api/permissions`
 
-Unused legacy controllers, DTOs, and services for those paths were removed. The
-active web app consumes only `/api/v1` route handlers.
+Unused legacy controllers, DTOs, services, placeholder controller artifacts, and
+transport DTOs for those paths were removed. The active web app consumes only
+`/api/v1` route handlers.
 
 ## Active HTTP surface
 
@@ -99,13 +100,17 @@ feature is already being changed.
 The cleanup removed a large unversioned HTTP surface and old transport DTOs, but
 it did not perform a broad package move. That remains future incremental work.
 
-## Remaining Phase 1 work
+## Phase 1 closeout
 
-1. Review this table against the current controllers and tests before starting
-   Phase 2.
-2. Add or adjust role-matrix tests for any operation not explicitly covered.
-3. Confirm whether any remaining shared service methods are only compatibility
-   helpers and remove them in feature-sized changes.
-4. Keep mobile out of compatibility decisions until it has real HORT API
+Phase 1 is accepted for the current backend/web scope. The closeout review
+confirmed that:
+
+1. This table matches the current `/api/v1` controllers.
+2. Role-matrix tests cover administrative read/write boundaries, `PARENT`
+   exclusion, and cross-tenant not-found behavior for the active contract.
+3. Shared services no longer contain compatibility helpers for removed legacy
+   HTTP paths; the final cleanup removed the unused `CollectorDto`, the stale
+   controller HTTP client placeholder, and the extra group creation helper.
+4. Mobile remains outside compatibility decisions until it has real HORT API
    integration.
-5. Start Phase 2 only after the endpoint/role inventory is accepted.
+5. Phase 2 may start from this accepted endpoint/role inventory.
