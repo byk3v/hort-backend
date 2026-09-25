@@ -99,7 +99,7 @@ class TenantIsolationIntegrationTest extends PostgresIntegrationTest {
 	void derivesTenantAndAuditUserWhenCreatingData() {
 		authenticate(HORT_2, "hort-2-admin-subject");
 
-		UUID groupId = groupService.save(new GroupSaveRequest("HORT-2 Created Group"));
+		UUID groupId = groupService.create(new GroupSaveRequest("HORT-2 Created Group")).id();
 
 		Map<String, Object> stored = transactionTemplate.execute(status -> {
 			setTenant(HORT_2);

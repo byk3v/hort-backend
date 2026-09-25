@@ -39,25 +39,13 @@ public class GroupService {
 	}
 
 	@Transactional
-	public UUID save(GroupSaveRequest req) {
-		var hort = tenantHortResolver.requireCurrentHort();
-		// Tutor tutor = tutorRepository.findById(req.tutorId())
-		// .orElseThrow(() -> new EntityNotFoundException("Tutor not found: " +
-		// req.tutorId()));
-
-		HortGroup g = new HortGroup();
-		g.setHort(hort);
-		g.setName(req.name());
-		// g.setTutor(tutor);
-
-		return groupRepository.save(g)
-			.getId();
-	}
-
-	@Transactional
 	public GroupDto create(GroupSaveRequest req) {
-		UUID id = save(req);
-		return getById(id);
+		var hort = tenantHortResolver.requireCurrentHort();
+		HortGroup group = new HortGroup();
+		group.setHort(hort);
+		group.setName(req.name());
+		HortGroup saved = groupRepository.save(group);
+		return new GroupDto(saved.getId(), saved.getName());
 	}
 
 	@Transactional
@@ -65,12 +53,7 @@ public class GroupService {
 		HortGroup g = groupRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Group not found: " + id));
 
-		// Tutor tutor = tutorRepository.findById(req.tutorId())
-		// .orElseThrow(() -> new EntityNotFoundException("Tutor not found: " +
-		// req.tutorId()));
-
 		g.setName(req.name());
-		// g.setTutor(tutor);
 		groupRepository.save(g);
 	}
 
